@@ -186,16 +186,16 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 	}
 
 	// new delcarations
-	int16_t buffer;
-	int count = 1;
+	//int16_t buffer;
+	//int count = 1;
 
 	// write the data and count the samples
 	if (g_eMode == eSpeedTest)
 		dwWritten = pstBufferData->dwDataNotify;
 	else {
 		//test
-		std::cout << typeid(pstBufferData->pvDataCurrentBuf).name() << '\n';
-		printf("pvDataCurrentBuf(pointer which points the real data) : \n");
+		//std::cout << typeid(pstBufferData->pvDataCurrentBuf).name() << '\n';
+		//printf("pvDataCurrentBuf(pointer which points the real data) : \n");
 
 		/*************************** Cpp to matlab  ***********************/
 		printf("Cpp to matlab part start\n");
@@ -321,11 +321,11 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		//signal_int16(=input_signal) exist from 0 to 8388607
 		
 		// define variables
-		static int count = 1;
+		static int loop_count = 1; //loop_count starting at 1
 		int num_samples_from_prev = 0;
 		int num_remain_samples = 0;
 
-		if (count == 1) {
+		if (loop_count == 1) {
 			num_samples_from_prev = 0;
 		}
 		else {
@@ -362,7 +362,7 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		static int cnt_signal = 0;
 		cnt_signal++;
 
-		if (count == 2) {
+		if (loop_count == 2) {
 			for (int i = 0; i < 30; i++) {
 				printf("\n\n %d th input_signal = %hd", i, *(input_signal + i));
 			}
@@ -373,6 +373,9 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		}
 		
 
+		for (int i = 0; i < processed_signal_size; i++) {
+			answer_signal[i] = 0;
+		}
 
 		//main procedure
 		for (int i = 0; i < processed_signal_size; i++) {
@@ -387,37 +390,53 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 				}
 			}
 
+			int num_amend = 1000;
+			if (i % num_amend == 0) {
+				if (i < 838000) {
+					if (average(input_signal + down_sampling_rate*i, down_sampling_rate * 1) >= th) {
+						for (int ii = 0; ii < num_amend; ii++) {
+							if (ii % 2 == 0) {
+								answer_signal[i + ii] = 1;
+							}
+						}
+					}
+					else {
+						for (int ii = 0; ii < num_amend; ii++) {
+							if (ii % 2 == 1) {
+								answer_signal[i + ii] = 1;
+							}
+						}
+					}
+					//printf("\n th = %f \n", th);
+					//printf("\n average = %f \n", average(input_signal + down_sampling_rate*i, down_sampling_rate * 1));
+				}
+
+				// when i >= 830000
+				else {
+					if (average(input_signal + down_sampling_rate*i, down_sampling_rate * 1) >= th) {
+						for (int ii = i; ii < processed_signal_size; ii++) {
+							if (ii % 2 == 0) {
+								answer_signal[ii] = 1;
+							}
+						}
+					}
+					else {
+						for (int ii = i; ii < processed_signal_size; ii++) {
+							if (ii % 2 == 1) {
+								answer_signal[ii] = 1;
+							}
+						}
+					}
+				}
+			}
 			if (average(input_signal + down_sampling_rate*i, down_sampling_rate * 1) >= th)
 				out_signal[i] = 1;
 			else
 				out_signal[i] = 0;
 		}
-
-
-
-
-		//make answer signal
-		for (int i = 0; i < processed_signal_size; i++) {
-			answer_signal[i] = 0;
-		}
-
-		if (out_signal[0] == 0) {
-			for (int i = 0; i < processed_signal_size; i++) {
-				if (i % 2 == 1) {
-					answer_signal[i] = 1;
-				}
-			}
-		}
-		else {
-			for (int i = 0; i < processed_signal_size; i++) {
-				if (i % 2 == 0) {
-					answer_signal[i] = 1;
-				}
-			}
-		}
 		
 		//print the answer_signal and input_signal togheter
-		for (int i = 838850; i < 838860; i++) {
+		for (int i = 838800; i < 838810; i++) {
 			printf("\n---------------------------------\n");
 			printf("%d th output_signal = %d and answer_signal = %d", i, out_signal[i], answer_signal[i]);
 			printf("\n\n");
@@ -431,23 +450,24 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		}
 
 		double whole_accuracy = ((double)number_of_correct_samples / (double)processed_signal_size) * 100;
-		printf("\n %d th correct samples = %d \n", count, number_of_correct_samples);
-		printf("\n %d th processed_signal_size = %d \n", count, processed_signal_size);
-		printf("\n\n %d th loop's whole accuracy = %f \n", count, whole_accuracy);
+		printf("\n %d th correct samples = %d \n", loop_count, number_of_correct_samples);
+		printf("\n %d th processed_signal_size = %d \n", loop_count, processed_signal_size);
+		printf("\n\n %d th loop's whole accuracy = %f \n", loop_count, whole_accuracy);
 
 		//count : counts the loop
-		count++;
+		loop_count++;
 
+		//write file
+		WriteFile(pstWorkData->hFile, pstBufferData->pvDataCurrentBuf, pstBufferData->dwDataNotify, &dwWritten, NULL);
+
+		//free allocated array and pointers
+		mxDestroyArray(T);
 		free(samples_from_prev);
 		free(out_signal);
 		free(tmp_signal);
 		free(remain_samples);
 		free(input_signal);
 		free(answer_signal);
-
-		//write file
-		WriteFile(pstWorkData->hFile, pstBufferData->pvDataCurrentBuf, pstBufferData->dwDataNotify, &dwWritten, NULL);
-		mxDestroyArray(T);
 		free(signal_int16_addr);
 	}
 
