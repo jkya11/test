@@ -185,24 +185,13 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		pstWorkData->uLastTime.QuadPart = uTime.QuadPart;
 	}
 
-	// new delcarations
-	//int16_t buffer;
-	//int count = 1;
-
 	// write the data and count the samples
 	if (g_eMode == eSpeedTest)
 		dwWritten = pstBufferData->dwDataNotify;
 	else {
-		//test
-		//std::cout << typeid(pstBufferData->pvDataCurrentBuf).name() << '\n';
-		//printf("pvDataCurrentBuf(pointer which points the real data) : \n");
+		/*************************** signal plot in matlab ***********************/		
 
-		/*************************** Cpp to matlab  ***********************/
-		printf("Cpp to matlab part start\n");
-		int16_t* signal_int16;
-
-
-		//open matlab
+		//open matlab engine
 		Engine *ep;
 		mxArray *T = NULL;
 
@@ -215,27 +204,14 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		const size_t dims[2] = { pstBufferData->dwDataNotify / sizeof(int16_t), 1 };
 		T = mxCreateNumericArray(1, dims, mxINT16_CLASS, mxREAL);
 
-		//copy signal_int16 to T
-		
-		signal_int16 = (int16_t *)malloc((pstBufferData->dwDataNotify));
+		//copy signal_int16 to T		
+		int16_t* signal_int16 = (int16_t *)malloc(pstBufferData->dwDataNotify);
 		int16_t* signal_int16_addr = signal_int16;
 		signal_int16 = (int16_t *)mxGetData(T);
 
 		memcpy(signal_int16, pstBufferData->pvDataCurrentBuf, (pstBufferData->dwDataNotify));
 
-		//print signal_int16 for test
-		//static int cnt_signal = 0;
-		//cnt_signal++;
-
-		//if (cnt_signal == 4) {
-		//	for (int i = 0; i <= 500; i++) {
-		//		printf("\n signal_int16 = %hd ", *(signal_int16 + i));
-
-		//	}
-		//}
-
 		//print T using matlab
-		//engEvalString(ep, "T = zeros(1000000,1)");
 		engPutVariable(ep, "T", T);
 
 		engEvalString(ep, "control_val = 50");
@@ -248,7 +224,6 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		engEvalString(ep, "x7 = T(301:16*control_val:end);");
 		engEvalString(ep, "x8 = T(351:16*control_val:end);");
 
-
 		engEvalString(ep, "x9 = T(401:16*control_val:end);");
 		engEvalString(ep, "x10 = T(451:16*control_val:end);");
 		engEvalString(ep, "x11 = T(501:16*control_val:end);");
@@ -257,7 +232,6 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		engEvalString(ep, "x14 = T(651:16*control_val:end);");
 		engEvalString(ep, "x15 = T(701:16*control_val:end);");
 		engEvalString(ep, "x16 = T(751:16*control_val:end);");
-
 
 		engEvalString(ep, "figure(1)");
 		engEvalString(ep, "subplot(2,4,1);");
@@ -309,21 +283,16 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		engEvalString(ep, "subplot(2,4,8)");
 		engEvalString(ep, "plot(x16)");
 
-		//engEvalString(ep, "plot(T(1:end), 'r');");
-		//engEvalString(ep, "hold on");
-		//engEvalString(ep, "plot(T(1:end), 'o');");
-
 		engEvalString(ep, "drawnow");
 		engEvalString(ep, "hold off");
-
 
 		/************************  signal process  ****************************/
 		//signal_int16(=input_signal) exist from 0 to 8388607
 		
 		// define variables
 		static int loop_count = 1; //loop_count starting at 1
-		int num_samples_from_prev = 0;
-		int num_remain_samples = 0;
+		static int num_samples_from_prev = 0;
+		static int num_remain_samples = 0;
 
 		if (loop_count == 1) {
 			num_samples_from_prev = 0;
@@ -332,8 +301,6 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 			num_samples_from_prev = num_remain_samples;
 		}
 
-		int16_t* samples_from_prev = (int16_t*)malloc(num_samples_from_prev * sizeof(int16_t));
-
 		const int number_of_samples = DATA_LENGTH / 2;
 		const int down_sampling_rate = 10;
 		const int looking_window_size = 16;
@@ -341,8 +308,12 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		double th = 0;
 		const int processed_signal_size = floor(number_of_samples / down_sampling_rate);
 		int16_t* out_signal = (int16_t*)malloc(processed_signal_size * sizeof(int16_t));
-		int16_t* tmp_signal = (int16_t*)malloc(number_of_samples * sizeof(int16_t));
+		int16_t* tmp_signal = (int16_t*)malloc((number_of_samples + down_sampling_rate) * sizeof(int16_t));
 		int16_t* answer_signal = (int16_t*)malloc(processed_signal_size * sizeof(int16_t));
+
+		static int16_t* samples_from_prev = (int16_t*)malloc(down_sampling_rate * sizeof(int16_t));
+		static int16_t* remain_samples = (int16_t*)malloc(down_sampling_rate * sizeof(int16_t));
+		
 
 		// regenerate input_signal using prev signal
 		memcpy(tmp_signal, signal_int16, number_of_samples * sizeof(int16_t));
@@ -351,27 +322,31 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 
 		// save remainder signal to next loop's prev signal
 		num_remain_samples = (num_samples_from_prev + number_of_samples) % down_sampling_rate;
-		int16_t* remain_samples = (int16_t*)malloc(num_remain_samples * sizeof(int16_t));
 		memcpy(remain_samples, signal_int16 + num_samples_from_prev + number_of_samples - num_remain_samples, num_remain_samples*sizeof(int16_t));
-		
-		// change input signal to be multiple of 10, move signal_int16 to input_signal
-		int16_t* input_signal = (int16_t*)malloc((number_of_samples - num_remain_samples) * sizeof(int16_t));
-		memcpy(input_signal, signal_int16, (number_of_samples - num_remain_samples) * sizeof(int16_t));
+		memcpy(samples_from_prev, remain_samples, num_remain_samples * sizeof(int16_t));
+
+		// change input signal to be multiple of 10, copy signal_int16 to input_signal
+		int16_t* input_signal = (int16_t*)malloc((num_samples_from_prev + number_of_samples - num_remain_samples) * sizeof(int16_t));
+		memcpy(input_signal, signal_int16, (num_samples_from_prev + number_of_samples - num_remain_samples) * sizeof(int16_t));
 
 		//print signal
 		static int cnt_signal = 0;
 		cnt_signal++;
 
-		if (loop_count == 2) {
-			for (int i = 0; i < 30; i++) {
+		if (1<=loop_count <=4) {
+			printf("\n loop_count = %d and num_samples_from_prev = %d and num_remains_samples = %d \n", loop_count, num_samples_from_prev, num_remain_samples);
+			for (int i = 0; i < 15; i++) {
+				printf("\n\n %d th samples_from_prev = %hd", i, *(samples_from_prev + i));
 				printf("\n\n %d th input_signal = %hd", i, *(input_signal + i));
 			}
 			printf("\n--------------------------------\n");
-			for (int i = 8388590; i < 8388610; i++) {
+			for (int i = 8388590; i < 8388615; i++) {
 				printf("\n\n %d th input_signal = %hd", i, *(input_signal + i));
 			}
 		}
-		
+		if (loop_count == 3) {
+			Sleep(20000);
+		}
 
 		for (int i = 0; i < processed_signal_size; i++) {
 			answer_signal[i] = 0;
@@ -436,11 +411,11 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		}
 		
 		//print the answer_signal and input_signal togheter
-		for (int i = 838800; i < 838810; i++) {
-			printf("\n---------------------------------\n");
-			printf("%d th output_signal = %d and answer_signal = %d", i, out_signal[i], answer_signal[i]);
-			printf("\n\n");
-		}
+		//for (int i = 838800; i < 838810; i++) {
+		//	printf("\n---------------------------------\n");
+		//	printf("%d th output_signal = %d and answer_signal = %d", i, out_signal[i], answer_signal[i]);
+		//	printf("\n\n");
+		//}
 
 		//print the accuracy
 		int number_of_correct_samples = 0;
@@ -462,10 +437,10 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 
 		//free allocated array and pointers
 		mxDestroyArray(T);
-		free(samples_from_prev);
+		//free(samples_from_prev);
 		free(out_signal);
 		free(tmp_signal);
-		free(remain_samples);
+		//free(remain_samples);
 		free(input_signal);
 		free(answer_signal);
 		free(signal_int16_addr);
