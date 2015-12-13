@@ -303,7 +303,7 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 
 		const int number_of_samples = DATA_LENGTH / 2;
 		const int down_sampling_rate = 10;
-		const int looking_window_size = 16;
+		const int looking_window_size = 200;
 		int moving_flag = 0;
 		double th = 0;
 		const int processed_signal_size = floor(number_of_samples / down_sampling_rate);
@@ -314,7 +314,6 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		static int16_t* samples_from_prev = (int16_t*)malloc(down_sampling_rate * sizeof(int16_t));
 		static int16_t* remain_samples = (int16_t*)malloc(down_sampling_rate * sizeof(int16_t));
 		
-
 		// regenerate input_signal using prev signal
 		memcpy(tmp_signal, signal_int16, number_of_samples * sizeof(int16_t));
 		memcpy(signal_int16, samples_from_prev, num_samples_from_prev * sizeof(int16_t));
@@ -333,21 +332,20 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		static int cnt_signal = 0;
 		cnt_signal++;
 
-		if (1<=loop_count <=4) {
-			printf("\n loop_count = %d and num_samples_from_prev = %d and num_remains_samples = %d \n", loop_count, num_samples_from_prev, num_remain_samples);
-			for (int i = 0; i < 15; i++) {
-				printf("\n\n %d th samples_from_prev = %hd", i, *(samples_from_prev + i));
-				printf("\n\n %d th input_signal = %hd", i, *(input_signal + i));
-			}
-			printf("\n--------------------------------\n");
-			for (int i = 8388590; i < 8388615; i++) {
-				printf("\n\n %d th input_signal = %hd", i, *(input_signal + i));
-			}
-		}
-		if (loop_count == 3) {
-			Sleep(20000);
-		}
+		//for testing samples
+		//if (1 <= loop_count <= 4) {
+		//	printf("\n loop_count = %d and num_samples_from_prev = %d and num_remains_samples = %d \n", loop_count, num_samples_from_prev, num_remain_samples);
+		//	for (int i = 0; i < 15; i++) {
+		//		//printf("\n\n %d th samples_from_prev = %hd", i, *(samples_from_prev + i));
+		//		printf("\n\n %d th input_signal = %hd", i, *(input_signal + i));
+		//	}
+		//	printf("\n--------------------------------\n");
+		//	for (int i = 8388590; i < 8388615; i++) {
+		//		printf("\n\n %d th input_signal = %hd", i, *(input_signal + i));
+		//	}
+		//}
 
+		// make answer_signal as 0
 		for (int i = 0; i < processed_signal_size; i++) {
 			answer_signal[i] = 0;
 		}
@@ -365,6 +363,7 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 				}
 			}
 
+			// create answer_signal
 			int num_amend = 1000;
 			if (i % num_amend == 0) {
 				if (i < 838000) {
@@ -382,6 +381,7 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 							}
 						}
 					}
+					//for print th and average value
 					//printf("\n th = %f \n", th);
 					//printf("\n average = %f \n", average(input_signal + down_sampling_rate*i, down_sampling_rate * 1));
 				}
@@ -429,7 +429,7 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		printf("\n %d th processed_signal_size = %d \n", loop_count, processed_signal_size);
 		printf("\n\n %d th loop's whole accuracy = %f \n", loop_count, whole_accuracy);
 
-		//count : counts the loop
+		//loop_count for counting the loop
 		loop_count++;
 
 		//write file
@@ -437,13 +437,14 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 
 		//free allocated array and pointers
 		mxDestroyArray(T);
-		//free(samples_from_prev);
 		free(out_signal);
 		free(tmp_signal);
-		//free(remain_samples);
 		free(input_signal);
 		free(answer_signal);
 		free(signal_int16_addr);
+
+		//free(samples_from_prev);
+		//free(remain_samples);
 	}
 
 	pstWorkData->llWritten += dwWritten;
