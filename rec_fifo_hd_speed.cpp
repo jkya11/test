@@ -210,81 +210,81 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		signal_int16 = (int16_t *)mxGetData(T);
 
 		memcpy(signal_int16, pstBufferData->pvDataCurrentBuf, (pstBufferData->dwDataNotify));
-
+	
 		//print T using matlab
 		engPutVariable(ep, "T", T);
+		
+		//engEvalString(ep, "control_val = 50");
+		//engEvalString(ep, "x1 = T(1:16*control_val:end);");
+		//engEvalString(ep, "x2 = T(51:16*control_val:end);");
+		//engEvalString(ep, "x3 = T(101:16*control_val:end);");
+		//engEvalString(ep, "x4 = T(151:16*control_val:end);");
+		//engEvalString(ep, "x5 = T(201:16*control_val:end);");
+		//engEvalString(ep, "x6 = T(251:16*control_val:end);");
+		//engEvalString(ep, "x7 = T(301:16*control_val:end);");
+		//engEvalString(ep, "x8 = T(351:16*control_val:end);");
 
-		engEvalString(ep, "control_val = 50");
-		engEvalString(ep, "x1 = T(1:16*control_val:end);");
-		engEvalString(ep, "x2 = T(51:16*control_val:end);");
-		engEvalString(ep, "x3 = T(101:16*control_val:end);");
-		engEvalString(ep, "x4 = T(151:16*control_val:end);");
-		engEvalString(ep, "x5 = T(201:16*control_val:end);");
-		engEvalString(ep, "x6 = T(251:16*control_val:end);");
-		engEvalString(ep, "x7 = T(301:16*control_val:end);");
-		engEvalString(ep, "x8 = T(351:16*control_val:end);");
+		//engEvalString(ep, "x9 = T(401:16*control_val:end);");
+		//engEvalString(ep, "x10 = T(451:16*control_val:end);");
+		//engEvalString(ep, "x11 = T(501:16*control_val:end);");
+		//engEvalString(ep, "x12 = T(551:16*control_val:end);");
+		//engEvalString(ep, "x13 = T(601:16*control_val:end);");
+		//engEvalString(ep, "x14 = T(651:16*control_val:end);");
+		//engEvalString(ep, "x15 = T(701:16*control_val:end);");
+		//engEvalString(ep, "x16 = T(751:16*control_val:end);");
 
-		engEvalString(ep, "x9 = T(401:16*control_val:end);");
-		engEvalString(ep, "x10 = T(451:16*control_val:end);");
-		engEvalString(ep, "x11 = T(501:16*control_val:end);");
-		engEvalString(ep, "x12 = T(551:16*control_val:end);");
-		engEvalString(ep, "x13 = T(601:16*control_val:end);");
-		engEvalString(ep, "x14 = T(651:16*control_val:end);");
-		engEvalString(ep, "x15 = T(701:16*control_val:end);");
-		engEvalString(ep, "x16 = T(751:16*control_val:end);");
+		//engEvalString(ep, "figure(1)");
+		//engEvalString(ep, "subplot(2,4,1);");
+		//engEvalString(ep, "plot(x1);");
 
-		engEvalString(ep, "figure(1)");
-		engEvalString(ep, "subplot(2,4,1);");
-		engEvalString(ep, "plot(x1);");
+		//engEvalString(ep, "subplot(2,4,2)");
+		//engEvalString(ep, "plot(x2)");
 
-		engEvalString(ep, "subplot(2,4,2)");
-		engEvalString(ep, "plot(x2)");
+		//engEvalString(ep, "subplot(2,4,3)");
+		//engEvalString(ep, "plot(x3)");
 
-		engEvalString(ep, "subplot(2,4,3)");
-		engEvalString(ep, "plot(x3)");
+		//engEvalString(ep, "subplot(2,4,4)");
+		//engEvalString(ep, "plot(x4)");
 
-		engEvalString(ep, "subplot(2,4,4)");
-		engEvalString(ep, "plot(x4)");
+		//engEvalString(ep, "subplot(2,4,5)");
+		//engEvalString(ep, "plot(x5)");
 
-		engEvalString(ep, "subplot(2,4,5)");
-		engEvalString(ep, "plot(x5)");
+		//engEvalString(ep, "subplot(2,4,6)");
+		//engEvalString(ep, "plot(x6)");
 
-		engEvalString(ep, "subplot(2,4,6)");
-		engEvalString(ep, "plot(x6)");
+		//engEvalString(ep, "subplot(2,4,7)");
+		//engEvalString(ep, "plot(x7)");
 
-		engEvalString(ep, "subplot(2,4,7)");
-		engEvalString(ep, "plot(x7)");
+		//engEvalString(ep, "subplot(2,4,8)");
+		//engEvalString(ep, "plot(x8)");
 
-		engEvalString(ep, "subplot(2,4,8)");
-		engEvalString(ep, "plot(x8)");
+		//engEvalString(ep, "figure(2)");
+		//engEvalString(ep, "subplot(2,4,1)");
+		//engEvalString(ep, "plot(x9)");
 
-		engEvalString(ep, "figure(2)");
-		engEvalString(ep, "subplot(2,4,1)");
-		engEvalString(ep, "plot(x9)");
+		//engEvalString(ep, "subplot(2,4,2)");
+		//engEvalString(ep, "plot(x10)");
 
-		engEvalString(ep, "subplot(2,4,2)");
-		engEvalString(ep, "plot(x10)");
+		//engEvalString(ep, "subplot(2,4,3)");
+		//engEvalString(ep, "plot(x11)");
 
-		engEvalString(ep, "subplot(2,4,3)");
-		engEvalString(ep, "plot(x11)");
+		//engEvalString(ep, "subplot(2,4,4)");
+		//engEvalString(ep, "plot(x12)");
 
-		engEvalString(ep, "subplot(2,4,4)");
-		engEvalString(ep, "plot(x12)");
+		//engEvalString(ep, "subplot(2,4,5)");
+		//engEvalString(ep, "plot(x13)");
 
-		engEvalString(ep, "subplot(2,4,5)");
-		engEvalString(ep, "plot(x13)");
+		//engEvalString(ep, "subplot(2,4,6)");
+		//engEvalString(ep, "plot(x14)");
 
-		engEvalString(ep, "subplot(2,4,6)");
-		engEvalString(ep, "plot(x14)");
+		//engEvalString(ep, "subplot(2,4,7)");
+		//engEvalString(ep, "plot(x15)");
 
-		engEvalString(ep, "subplot(2,4,7)");
-		engEvalString(ep, "plot(x15)");
+		//engEvalString(ep, "subplot(2,4,8)");
+		//engEvalString(ep, "plot(x16)");
 
-		engEvalString(ep, "subplot(2,4,8)");
-		engEvalString(ep, "plot(x16)");
-
-		engEvalString(ep, "drawnow");
-		engEvalString(ep, "hold off");
+		//engEvalString(ep, "drawnow");
+		//engEvalString(ep, "hold off");
 
 		/************************  signal process  ****************************/
 		//signal_int16(=input_signal) exist from 0 to 8388607
@@ -429,6 +429,113 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		printf("\n %d th processed_signal_size = %d \n", loop_count, processed_signal_size);
 		printf("\n\n %d th loop's whole accuracy = %f \n", loop_count, whole_accuracy);
 
+		//*************signal separation rat1, rat2 and 8 channels**************//
+		const static int CHANNEL_NUM = 8;
+		const static int BITS_NUM = 8 * 2;
+		static int starting_point = 0;
+		int k = 0;
+
+		//define T(matlab array)
+		mxArray *T_RAT1_CH1 = NULL; mxArray *T_RAT2_CH1 = NULL;
+		mxArray *T_RAT1_CH2 = NULL; mxArray *T_RAT2_CH2 = NULL;
+		mxArray *T_RAT1_CH3 = NULL; mxArray *T_RAT2_CH3 = NULL;
+		mxArray *T_RAT1_CH4 = NULL; mxArray *T_RAT2_CH4 = NULL;
+		mxArray *T_RAT1_CH5 = NULL; mxArray *T_RAT2_CH5 = NULL;
+		mxArray *T_RAT1_CH6 = NULL; mxArray *T_RAT2_CH6 = NULL;
+		mxArray *T_RAT1_CH7 = NULL; mxArray *T_RAT2_CH7 = NULL;
+		mxArray *T_RAT1_CH8 = NULL; mxArray *T_RAT2_CH8 = NULL;
+
+		uint8_t* rat1_ch1 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+		uint8_t* rat2_ch1 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+		uint8_t* rat1_ch2 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+		uint8_t* rat2_ch2 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+		uint8_t* rat1_ch3 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+		uint8_t* rat2_ch3 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+		uint8_t* rat1_ch4 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+		uint8_t* rat2_ch4 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+		uint8_t* rat1_ch5 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+		uint8_t* rat2_ch5 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+		uint8_t* rat1_ch6 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+		uint8_t* rat2_ch6 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+		uint8_t* rat1_ch7 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+		uint8_t* rat2_ch7 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+		uint8_t* rat1_ch8 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+		uint8_t* rat2_ch8 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+
+		const size_t rat1_ch1_dims[2] = { (int)(processed_signal_size / BITS_NUM / 8), 1 };
+		T_RAT1_CH1 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+		T_RAT2_CH1 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+		T_RAT1_CH2 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+		T_RAT2_CH2 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+		T_RAT1_CH3 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+		T_RAT2_CH3 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+		T_RAT1_CH4 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+		T_RAT2_CH4 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+		T_RAT1_CH5 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+		T_RAT2_CH5 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+		T_RAT1_CH6 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+		T_RAT2_CH6 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+		T_RAT1_CH7 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+		T_RAT2_CH7 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+		T_RAT1_CH8 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+		T_RAT2_CH8 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+
+		rat1_ch1 = (uint8_t *)mxGetData(T_RAT1_CH1); rat2_ch1 = (uint8_t *)mxGetData(T_RAT2_CH1);
+		rat1_ch2 = (uint8_t *)mxGetData(T_RAT1_CH2); rat2_ch2 = (uint8_t *)mxGetData(T_RAT2_CH2);
+		rat1_ch3 = (uint8_t *)mxGetData(T_RAT1_CH3); rat2_ch3 = (uint8_t *)mxGetData(T_RAT2_CH3);
+		rat1_ch4 = (uint8_t *)mxGetData(T_RAT1_CH4); rat2_ch4 = (uint8_t *)mxGetData(T_RAT2_CH4);
+		rat1_ch5 = (uint8_t *)mxGetData(T_RAT1_CH5); rat2_ch5 = (uint8_t *)mxGetData(T_RAT2_CH5);
+		rat1_ch6 = (uint8_t *)mxGetData(T_RAT1_CH6); rat2_ch6 = (uint8_t *)mxGetData(T_RAT2_CH6);
+		rat1_ch7 = (uint8_t *)mxGetData(T_RAT1_CH7); rat2_ch7 = (uint8_t *)mxGetData(T_RAT2_CH7);
+		rat1_ch8 = (uint8_t *)mxGetData(T_RAT1_CH8); rat2_ch8 = (uint8_t *)mxGetData(T_RAT2_CH8);
+
+		while (CHANNEL_NUM*BITS_NUM*(k + 1) < processed_signal_size) {
+			rat1_ch1[k] = (uint8_t)(out_signal[starting_point + k * 128] * 128 + out_signal[starting_point + k * 128 + 2] * 64 + out_signal[starting_point + k * 128 + 4] * 32 + out_signal[starting_point + k * 128 + 6] * 16 + out_signal[starting_point + k * 128 + 8] * 8 + out_signal[starting_point + k * 128 + 10] * 4 + out_signal[starting_point + k * 128 + 12] * 2 + out_signal[starting_point + k * 128 + 14] * 1);
+
+			printf("rat1_ch1 value = %d ", rat1_ch1[k]);
+			k = k + 1;
+		}
+
+
+		//printf("rat1_ch1 value = %d ", rat1_ch1[k]);
+
+		
+
+		//copy signal_int16 to T		
+		//int16_t* signal_int16 = (int16_t *)malloc(pstBufferData->dwDataNotify);
+		
+
+
+		//memcpy(signal_int16, pstBufferData->pvDataCurrentBuf, (pstBufferData->dwDataNotify));
+
+		//print T using matlab
+		engPutVariable(ep, "T_RAT1_CH1", T_RAT1_CH1);
+
+		//engEvalString(ep, "control_val = 50");
+		engEvalString(ep, "x1 = T_RAT1_CH1(1:end);");
+		/*engEvalString(ep, "x2 = T(51:16*control_val:end);");
+		engEvalString(ep, "x3 = T(101:16*control_val:end);");
+		engEvalString(ep, "x4 = T(151:16*control_val:end);");
+		engEvalString(ep, "x5 = T(201:16*control_val:end);");
+		engEvalString(ep, "x6 = T(251:16*control_val:end);");
+		engEvalString(ep, "x7 = T(301:16*control_val:end);");
+		engEvalString(ep, "x8 = T(351:16*control_val:end);");
+
+		engEvalString(ep, "x9 = T(401:16*control_val:end);");
+		engEvalString(ep, "x10 = T(451:16*control_val:end);");
+		engEvalString(ep, "x11 = T(501:16*control_val:end);");
+		engEvalString(ep, "x12 = T(551:16*control_val:end);");
+		engEvalString(ep, "x13 = T(601:16*control_val:end);");
+		engEvalString(ep, "x14 = T(651:16*control_val:end);");
+		engEvalString(ep, "x15 = T(701:16*control_val:end);");
+		engEvalString(ep, "x16 = T(751:16*control_val:end);");
+*/
+		engEvalString(ep, "figure(1)");
+		engEvalString(ep, "subplot(2,4,1);");
+		engEvalString(ep, "plot(x1);");
+
+		//out_signal : 0 ~ processed_signal_size
+		
 		//loop_count for counting the loop
 		loop_count++;
 
