@@ -190,7 +190,7 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		dwWritten = pstBufferData->dwDataNotify;
 	else {
 		/*************************** signal plot in matlab ***********************/		
-
+		static int recording_flag = 0;
 		//open matlab engine
 		Engine *ep;
 		mxArray *T = NULL;
@@ -213,88 +213,10 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 	
 		//print T using matlab
 		engPutVariable(ep, "T", T);
-		
-		//engEvalString(ep, "control_val = 50");
-		//engEvalString(ep, "all = T(1:end);");
-
-		//engEvalString(ep, "x2 = T(51:16*control_val:end);");
-		//engEvalString(ep, "x3 = T(101:16*control_val:end);");
-		//engEvalString(ep, "x4 = T(151:16*control_val:end);");
-		//engEvalString(ep, "x5 = T(201:16*control_val:end);");
-		//engEvalString(ep, "x6 = T(251:16*control_val:end);");
-		//engEvalString(ep, "x7 = T(301:16*control_val:end);");
-		//engEvalString(ep, "x8 = T(351:16*control_val:end);");
-
-		//engEvalString(ep, "x9 = T(401:16*control_val:end);");
-		//engEvalString(ep, "x10 = T(451:16*control_val:end);");
-		//engEvalString(ep, "x11 = T(501:16*control_val:end);");
-		//engEvalString(ep, "x12 = T(551:16*control_val:end);");
-		//engEvalString(ep, "x13 = T(601:16*control_val:end);");
-		//engEvalString(ep, "x14 = T(651:16*control_val:end);");
-		//engEvalString(ep, "x15 = T(701:16*control_val:end);");
-		//engEvalString(ep, "x16 = T(751:16*control_val:end);");
-
-		
-		//engEvalString(ep, "figure(3)");
-		//engEvalString(ep, "subplot(2,4,1);");
-		//engEvalString(ep, "plot(all);");
-		//engEvalString(ep, "drawnow");
-		//engEvalString(ep, "hold off");
-		//engEvalString(ep, "subplot(2,4,2)");
-		//engEvalString(ep, "plot(x2)");
-
-		//engEvalString(ep, "subplot(2,4,3)");
-		//engEvalString(ep, "plot(x3)");
-
-		//engEvalString(ep, "subplot(2,4,4)");
-		//engEvalString(ep, "plot(x4)");
-
-		//engEvalString(ep, "subplot(2,4,5)");
-		//engEvalString(ep, "plot(x5)");
-
-		//engEvalString(ep, "subplot(2,4,6)");
-		//engEvalString(ep, "plot(x6)");
-
-		//engEvalString(ep, "subplot(2,4,7)");
-		//engEvalString(ep, "plot(x7)");
-
-		//engEvalString(ep, "subplot(2,4,8)");
-		//engEvalString(ep, "plot(x8)");
-
-		//engEvalString(ep, "figure(2)");
-		//engEvalString(ep, "subplot(2,4,1)");
-		//engEvalString(ep, "plot(x9)");
-
-		//engEvalString(ep, "subplot(2,4,2)");
-		//engEvalString(ep, "plot(x10)");
-
-		//engEvalString(ep, "subplot(2,4,3)");
-		//engEvalString(ep, "plot(x11)");
-
-		//engEvalString(ep, "subplot(2,4,4)");
-		//engEvalString(ep, "plot(x12)");
-
-		//engEvalString(ep, "subplot(2,4,5)");
-		//engEvalString(ep, "plot(x13)");
-
-		//engEvalString(ep, "subplot(2,4,6)");
-		//engEvalString(ep, "plot(x14)");
-
-		//engEvalString(ep, "subplot(2,4,7)");
-		//engEvalString(ep, "plot(x15)");
-
-		//engEvalString(ep, "subplot(2,4,8)");
-		//engEvalString(ep, "plot(x16)");
-
-		//engEvalString(ep, "drawnow");
-		//engEvalString(ep, "hold off");
 
 		/************************  signal process  ****************************/
-		//signal_int16(=input_signal) exist from 0 to 8388607
-		
+		// signal_int16(=input_signal) exist from 0 to 8388607		
 		// define variables
-
-
 		static int loop_count = 1; //loop_count starting at 1
 		static int num_samples_from_prev = 0;
 		static int num_remain_samples = 0;
@@ -311,7 +233,7 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		const int looking_window_size = 200;
 		int moving_flag = 0;
 		double th = 0;
-		const int processed_signal_size = floor(number_of_samples / down_sampling_rate);
+		int processed_signal_size = floor(number_of_samples / down_sampling_rate);
 		int16_t* out_signal = (int16_t*)malloc(processed_signal_size * sizeof(int16_t));
 		int16_t* tmp_signal = (int16_t*)malloc((number_of_samples + down_sampling_rate) * sizeof(int16_t));
 		int16_t* answer_signal = (int16_t*)malloc(processed_signal_size * sizeof(int16_t));
@@ -319,7 +241,6 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		static int16_t* samples_from_prev = (int16_t*)malloc(down_sampling_rate * sizeof(int16_t));
 		static int16_t* remain_samples = (int16_t*)malloc(down_sampling_rate * sizeof(int16_t));
 	
-
 		// regenerate input_signal using prev signal
 		memcpy(tmp_signal, signal_int16, number_of_samples * sizeof(int16_t));
 		memcpy(signal_int16, samples_from_prev, num_samples_from_prev * sizeof(int16_t));
@@ -423,7 +344,6 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		//	printf("\n\n");
 		//}
 
-
 		//plot the out_signal
 		int count_differ = 0;
 		for (int i = 0; i < processed_signal_size-1; i++) {
@@ -432,7 +352,7 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 			}
 		}
 
-		printf("%d", count_differ);
+		//printf("%d", count_differ);
 		//print the accuracy
 		int number_of_correct_samples = 0;
 		for (int i = 0; i < processed_signal_size; i++) {
@@ -445,252 +365,267 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		printf("\n %d th processed_signal_size = %d \n", loop_count, processed_signal_size);
 		printf("\n\n %d th loop's whole accuracy = %f \n", loop_count, whole_accuracy);
 
-		//*************signal separation rat1, rat2 and 8 channels**************//
-		const static int CHANNEL_NUM = 8;
-		const static int BITS_NUM = 8 * 2;
-		static int starting_point = 0;
-		int k = 0;
-		uint8_t* tmp_full_storage = (uint8_t*)malloc(128 * sizeof(uint8_t));
-		static uint8_t* tmp_storage = (uint8_t*)malloc(128 * (sizeof(uint8_t)));
+		//recording_flaging using preamble
+		static const int preamble_size = 16;
+		int third_1_cnt = 0;
+		int third_0_cnt = 0;
 
-		//define T(matlab array)
-		mxArray *T_RAT1_CH1 = NULL; mxArray *T_RAT2_CH1 = NULL;
-		mxArray *T_RAT1_CH2 = NULL; mxArray *T_RAT2_CH2 = NULL;
-		mxArray *T_RAT1_CH3 = NULL; mxArray *T_RAT2_CH3 = NULL;
-		mxArray *T_RAT1_CH4 = NULL; mxArray *T_RAT2_CH4 = NULL;
-		mxArray *T_RAT1_CH5 = NULL; mxArray *T_RAT2_CH5 = NULL;
-		mxArray *T_RAT1_CH6 = NULL; mxArray *T_RAT2_CH6 = NULL;
-		mxArray *T_RAT1_CH7 = NULL; mxArray *T_RAT2_CH7 = NULL;
-		mxArray *T_RAT1_CH8 = NULL; mxArray *T_RAT2_CH8 = NULL;
+		if (recording_flag == 0) {
+			for (int i = 0; i < processed_signal_size - 16; i++) {
+				if (out_signal[i] == 1 && out_signal[i + 1] == 0 && out_signal[i + 2] == 1 && out_signal[i + 3] == 0) {
+					if (out_signal[i + 4] == 1 && out_signal[i + 5] == 1 && out_signal[i + 6] == 0 && out_signal[i + 7] == 0) {
+						for (int j = 1; j <= 4; j++) {
+							if (out_signal[i + 7 + j] == 1) {
+								third_1_cnt++;
+							}
+							if (out_signal[i + 11 + j] == 0) {
+								third_0_cnt++;
+							}
+						}
+						//third_1_cnt = 3;
+						//third_0_cnt = 4;
 
-		uint8_t* rat1_ch1 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
-		uint8_t* rat2_ch1 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
-		uint8_t* rat1_ch2 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
-		uint8_t* rat2_ch2 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
-		uint8_t* rat1_ch3 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
-		uint8_t* rat2_ch3 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
-		uint8_t* rat1_ch4 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
-		uint8_t* rat2_ch4 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
-		uint8_t* rat1_ch5 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
-		uint8_t* rat2_ch5 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
-		uint8_t* rat1_ch6 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
-		uint8_t* rat2_ch6 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
-		uint8_t* rat1_ch7 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
-		uint8_t* rat2_ch7 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
-		uint8_t* rat1_ch8 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
-		uint8_t* rat2_ch8 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+						if (third_1_cnt == 4 && third_0_cnt == 4) {
+							recording_flag = 1;
+							memcpy(out_signal, out_signal + preamble_size, processed_signal_size - i - preamble_size);
+							processed_signal_size = processed_signal_size - i - preamble_size;
+						}
 
-		const size_t rat1_ch1_dims[2] = { (int)(processed_signal_size / BITS_NUM / 8), 1 };
-		T_RAT1_CH1 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
-		T_RAT2_CH1 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
-		T_RAT1_CH2 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
-		T_RAT2_CH2 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
-		T_RAT1_CH3 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
-		T_RAT2_CH3 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
-		T_RAT1_CH4 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
-		T_RAT2_CH4 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
-		T_RAT1_CH5 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
-		T_RAT2_CH5 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
-		T_RAT1_CH6 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
-		T_RAT2_CH6 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
-		T_RAT1_CH7 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
-		T_RAT2_CH7 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
-		T_RAT1_CH8 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
-		T_RAT2_CH8 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
-
-		rat1_ch1 = (uint8_t *)mxGetData(T_RAT1_CH1); rat2_ch1 = (uint8_t *)mxGetData(T_RAT2_CH1);
-		rat1_ch2 = (uint8_t *)mxGetData(T_RAT1_CH2); rat2_ch2 = (uint8_t *)mxGetData(T_RAT2_CH2);
-		rat1_ch3 = (uint8_t *)mxGetData(T_RAT1_CH3); rat2_ch3 = (uint8_t *)mxGetData(T_RAT2_CH3);
-		rat1_ch4 = (uint8_t *)mxGetData(T_RAT1_CH4); rat2_ch4 = (uint8_t *)mxGetData(T_RAT2_CH4);
-		rat1_ch5 = (uint8_t *)mxGetData(T_RAT1_CH5); rat2_ch5 = (uint8_t *)mxGetData(T_RAT2_CH5);
-		rat1_ch6 = (uint8_t *)mxGetData(T_RAT1_CH6); rat2_ch6 = (uint8_t *)mxGetData(T_RAT2_CH6);
-		rat1_ch7 = (uint8_t *)mxGetData(T_RAT1_CH7); rat2_ch7 = (uint8_t *)mxGetData(T_RAT2_CH7);
-		rat1_ch8 = (uint8_t *)mxGetData(T_RAT1_CH8); rat2_ch8 = (uint8_t *)mxGetData(T_RAT2_CH8);
-
-		//main procedure of decoding from CDMA encoded signal
-		memcpy(tmp_full_storage, tmp_storage, starting_point);
-		memcpy(tmp_full_storage + starting_point, out_signal, 128 - starting_point);
-
-		if (starting_point != 0) {
-			rat1_ch1[0] = tmp_full_storage[0] * 128 + tmp_full_storage[2] * 64 + tmp_full_storage[4] * 32 + tmp_full_storage[6] * 16 + tmp_full_storage[8] * 8 + tmp_full_storage[10] * 4 + tmp_full_storage[12] * 2 + tmp_full_storage[14] * 1;
-			rat2_ch1[0] = tmp_full_storage[0 + 1] * 128 + tmp_full_storage[2 + 1] * 64 + tmp_full_storage[4 + 1] * 32 + tmp_full_storage[6 + 1] * 16 + tmp_full_storage[8 + 1] * 8 + tmp_full_storage[10 + 1] * 4 + tmp_full_storage[12 + 1] * 2 + tmp_full_storage[14 + 1] * 1;
-			rat1_ch2[0] = tmp_full_storage[16 * 1 + 0] * 128 + tmp_full_storage[16 * 1 + 2] * 64 + tmp_full_storage[16 * 1 + 4] * 32 + tmp_full_storage[16 * 1 + 6] * 16 + tmp_full_storage[16 * 1 + 8] * 8 + tmp_full_storage[16 * 1 + 10] * 4 + tmp_full_storage[16 * 1 + 12] * 2 + tmp_full_storage[16 * 1 + 14] * 1;
-			rat2_ch2[0] = tmp_full_storage[16 * 1 + 0 + 1] * 128 + tmp_full_storage[16 * 1 + 2 + 1] * 64 + tmp_full_storage[16 * 1 + 4 + 1] * 32 + tmp_full_storage[16 * 1 + 6 + 1] * 16 + tmp_full_storage[16 * 1 + 8 + 1] * 8 + tmp_full_storage[16 * 1 + 10 + 1] * 4 + tmp_full_storage[16 * 1 + 12 + 1] * 2 + tmp_full_storage[16 * 1 + 14 + 1] * 1;
-			rat1_ch3[0] = tmp_full_storage[16 * 2 + 0] * 128 + tmp_full_storage[16 * 2 + 2] * 64 + tmp_full_storage[16 * 2 + 4] * 32 + tmp_full_storage[16 * 2 + 6] * 16 + tmp_full_storage[16 * 2 + 8] * 8 + tmp_full_storage[16 * 2 + 10] * 4 + tmp_full_storage[16 * 2 + 12] * 2 + tmp_full_storage[16 * 2 + 14] * 1;
-			rat2_ch3[0] = tmp_full_storage[16 * 2 + 0 + 1] * 128 + tmp_full_storage[16 * 2 + 2 + 1] * 64 + tmp_full_storage[16 * 2 + 4 + 1] * 32 + tmp_full_storage[16 * 2 + 6 + 1] * 16 + tmp_full_storage[16 * 2 + 8 + 1] * 8 + tmp_full_storage[16 * 2 + 10 + 1] * 4 + tmp_full_storage[16 * 2 + 12 + 1] * 2 + tmp_full_storage[16 * 2 + 14 + 1] * 1;
-			rat1_ch4[0] = tmp_full_storage[16 * 3 + 0] * 128 + tmp_full_storage[16 * 3 + 2] * 64 + tmp_full_storage[16 * 3 + 4] * 32 + tmp_full_storage[16 * 3 + 6] * 16 + tmp_full_storage[16 * 3 + 8] * 8 + tmp_full_storage[16 * 3 + 10] * 4 + tmp_full_storage[16 * 3 + 12] * 2 + tmp_full_storage[16 * 3 + 14] * 1;
-			rat2_ch4[0] = tmp_full_storage[16 * 3 + 0 + 1] * 128 + tmp_full_storage[16 * 3 + 2 + 1] * 64 + tmp_full_storage[16 * 3 + 4 + 1] * 32 + tmp_full_storage[16 * 3 + 6 + 1] * 16 + tmp_full_storage[16 * 3 + 8 + 1] * 8 + tmp_full_storage[16 * 3 + 10 + 1] * 4 + tmp_full_storage[16 * 3 + 12 + 1] * 2 + tmp_full_storage[16 * 3 + 14 + 1] * 1;
-			rat1_ch5[0] = tmp_full_storage[16 * 4 + 0] * 128 + tmp_full_storage[16 * 4 + 2] * 64 + tmp_full_storage[16 * 4 + 4] * 32 + tmp_full_storage[16 * 4 + 6] * 16 + tmp_full_storage[16 * 4 + 8] * 8 + tmp_full_storage[16 * 4 + 10] * 4 + tmp_full_storage[16 * 4 + 12] * 2 + tmp_full_storage[16 * 4 + 14] * 1;
-			rat2_ch5[0] = tmp_full_storage[16 * 4 + 0 + 1] * 128 + tmp_full_storage[16 * 4 + 2 + 1] * 64 + tmp_full_storage[16 * 4 + 4 + 1] * 32 + tmp_full_storage[16 * 4 + 6 + 1] * 16 + tmp_full_storage[16 * 4 + 8 + 1] * 8 + tmp_full_storage[16 * 4 + 10 + 1] * 4 + tmp_full_storage[16 * 4 + 12 + 1] * 2 + tmp_full_storage[16 * 4 + 14 + 1] * 1;
-			rat1_ch6[0] = tmp_full_storage[16 * 5 + 0] * 128 + tmp_full_storage[16 * 5 + 2] * 64 + tmp_full_storage[16 * 5 + 4] * 32 + tmp_full_storage[16 * 5 + 6] * 16 + tmp_full_storage[16 * 5 + 8] * 8 + tmp_full_storage[16 * 5 + 10] * 4 + tmp_full_storage[16 * 5 + 12] * 2 + tmp_full_storage[16 * 5 + 14] * 1;
-			rat2_ch6[0] = tmp_full_storage[16 * 5 + 0 + 1] * 128 + tmp_full_storage[16 * 5 + 2 + 1] * 64 + tmp_full_storage[16 * 5 + 4 + 1] * 32 + tmp_full_storage[16 * 5 + 6 + 1] * 16 + tmp_full_storage[16 * 5 + 8 + 1] * 8 + tmp_full_storage[16 * 5 + 10 + 1] * 4 + tmp_full_storage[16 * 5 + 12 + 1] * 2 + tmp_full_storage[16 * 5 + 14 + 1] * 1;
-			rat1_ch7[0] = tmp_full_storage[16 * 6 + 0] * 128 + tmp_full_storage[16 * 6 + 2] * 64 + tmp_full_storage[16 * 6 + 4] * 32 + tmp_full_storage[16 * 6 + 6] * 16 + tmp_full_storage[16 * 6 + 8] * 8 + tmp_full_storage[16 * 6 + 10] * 4 + tmp_full_storage[16 * 6 + 12] * 2 + tmp_full_storage[16 * 6 + 14] * 1;
-			rat2_ch7[0] = tmp_full_storage[16 * 6 + 0 + 1] * 128 + tmp_full_storage[16 * 6 + 2 + 1] * 64 + tmp_full_storage[16 * 6 + 4 + 1] * 32 + tmp_full_storage[16 * 6 + 6 + 1] * 16 + tmp_full_storage[16 * 6 + 8 + 1] * 8 + tmp_full_storage[16 * 6 + 10 + 1] * 4 + tmp_full_storage[16 * 6 + 12 + 1] * 2 + tmp_full_storage[16 * 6 + 14 + 1] * 1;
-			rat1_ch8[0] = tmp_full_storage[16 * 7 + 0] * 128 + tmp_full_storage[16 * 7 + 2] * 64 + tmp_full_storage[16 * 7 + 4] * 32 + tmp_full_storage[16 * 7 + 6] * 16 + tmp_full_storage[16 * 7 + 8] * 8 + tmp_full_storage[16 * 7 + 10] * 4 + tmp_full_storage[16 * 7 + 12] * 2 + tmp_full_storage[16 * 7 + 14] * 1;
-			rat2_ch8[0] = tmp_full_storage[16 * 7 + 0 + 1] * 128 + tmp_full_storage[16 * 7 + 2 + 1] * 64 + tmp_full_storage[16 * 7 + 4 + 1] * 32 + tmp_full_storage[16 * 7 + 6 + 1] * 16 + tmp_full_storage[16 * 7 + 8 + 1] * 8 + tmp_full_storage[16 * 7 + 10 + 1] * 4 + tmp_full_storage[16 * 7 + 12 + 1] * 2 + tmp_full_storage[16 * 7 + 14 + 1] * 1;
-			
-			while (CHANNEL_NUM*BITS_NUM*(k + 1) < processed_signal_size) {
-				rat1_ch1[k + 1] = (uint8_t)(out_signal[starting_point + k * 128] * 128 + out_signal[starting_point + k * 128 + 2] * 64 + out_signal[starting_point + k * 128 + 4] * 32 + out_signal[starting_point + k * 128 + 6] * 16 + out_signal[starting_point + k * 128 + 8] * 8 + out_signal[starting_point + k * 128 + 10] * 4 + out_signal[starting_point + k * 128 + 12] * 2 + out_signal[starting_point + k * 128 + 14] * 1);
-				rat2_ch1[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 1] * 128 + out_signal[starting_point + k * 128 + 3] * 64 + out_signal[starting_point + k * 128 + 5] * 32 + out_signal[starting_point + k * 128 + 7] * 16 + out_signal[starting_point + k * 128 + 9] * 8 + out_signal[starting_point + k * 128 + 11] * 4 + out_signal[starting_point + k * 128 + 13] * 2 + out_signal[starting_point + k * 128 + 15] * 1);
-				rat1_ch2[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16] * 128 + out_signal[starting_point + k * 128 + 16 + 2] * 64 + out_signal[starting_point + k * 128 + 16 + 4] * 32 + out_signal[starting_point + k * 128 + 16 + 6] * 16 + out_signal[starting_point + k * 128 + 16 + 8] * 8 + out_signal[starting_point + k * 128 + 16 + 10] * 4 + out_signal[starting_point + k * 128 + 16 + 12] * 2 + out_signal[starting_point + k * 128 + 16 + 14] * 1);
-				rat2_ch2[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 + 1] * 128 + out_signal[starting_point + k * 128 + 16 + 3] * 64 + out_signal[starting_point + k * 128 + 16 + 5] * 32 + out_signal[starting_point + k * 128 + 16 + 7] * 16 + out_signal[starting_point + k * 128 + 16 + 9] * 8 + out_signal[starting_point + k * 128 + 16 + 11] * 4 + out_signal[starting_point + k * 128 + 16 + 13] * 2 + out_signal[starting_point + k * 128 + 16 + 15] * 1);
-				rat1_ch3[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 2] * 128 + out_signal[starting_point + k * 128 + 16 * 2 + 2] * 64 + out_signal[starting_point + k * 128 + 16 * 2 + 4] * 32 + out_signal[starting_point + k * 128 + 16 * 2 + 6] * 16 + out_signal[starting_point + k * 128 + 16 * 2 + 8] * 8 + out_signal[starting_point + k * 128 + 16 * 2 + 10] * 4 + out_signal[starting_point + k * 128 + 16 * 2 + 12] * 2 + out_signal[starting_point + k * 128 + 16 * 2 + 14] * 1);
-				rat2_ch3[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 2 + 1] * 128 + out_signal[starting_point + k * 128 + 16 * 2 + 3] * 64 + out_signal[starting_point + k * 128 + 16 * 2 + 5] * 32 + out_signal[starting_point + k * 128 + 16 * 2 + 7] * 16 + out_signal[starting_point + k * 128 + 16 * 2 + 9] * 8 + out_signal[starting_point + k * 128 + 16 * 2 + 11] * 4 + out_signal[starting_point + k * 128 + 16 * 2 + 13] * 2 + out_signal[starting_point + k * 128 + 16 * 2 + 15] * 1);
-				rat1_ch4[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 3] * 128 + out_signal[starting_point + k * 128 + 16 * 3 + 2] * 64 + out_signal[starting_point + k * 128 + 16 * 3 + 4] * 32 + out_signal[starting_point + k * 128 + 16 * 3 + 6] * 16 + out_signal[starting_point + k * 128 + 16 * 3 + 8] * 8 + out_signal[starting_point + k * 128 + 16 * 3 + 10] * 4 + out_signal[starting_point + k * 128 + 16 * 3 + 12] * 2 + out_signal[starting_point + k * 128 + 16 * 3 + 14] * 1);
-				rat2_ch4[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 3 + 1] * 128 + out_signal[starting_point + k * 128 + 16 * 3 + 3] * 64 + out_signal[starting_point + k * 128 + 16 * 3 + 5] * 32 + out_signal[starting_point + k * 128 + 16 * 3 + 7] * 16 + out_signal[starting_point + k * 128 + 16 * 3 + 9] * 8 + out_signal[starting_point + k * 128 + 16 * 3 + 11] * 4 + out_signal[starting_point + k * 128 + 16 * 3 + 13] * 2 + out_signal[starting_point + k * 128 + 16 * 3 + 15] * 1);
-				rat1_ch5[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 4] * 128 + out_signal[starting_point + k * 128 + 16 * 4 + 2] * 64 + out_signal[starting_point + k * 128 + 16 * 4 + 4] * 32 + out_signal[starting_point + k * 128 + 16 * 4 + 6] * 16 + out_signal[starting_point + k * 128 + 16 * 4 + 8] * 8 + out_signal[starting_point + k * 128 + 16 * 4 + 10] * 4 + out_signal[starting_point + k * 128 + 16 * 4 + 12] * 2 + out_signal[starting_point + k * 128 + 16 * 4 + 14] * 1);
-				rat2_ch5[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 4 + 1] * 128 + out_signal[starting_point + k * 128 + 16 * 4 + 3] * 64 + out_signal[starting_point + k * 128 + 16 * 4 + 5] * 32 + out_signal[starting_point + k * 128 + 16 * 4 + 7] * 16 + out_signal[starting_point + k * 128 + 16 * 4 + 9] * 8 + out_signal[starting_point + k * 128 + 16 * 4 + 11] * 4 + out_signal[starting_point + k * 128 + 16 * 4 + 13] * 2 + out_signal[starting_point + k * 128 + 16 * 4 + 15] * 1);
-				rat1_ch6[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 5] * 128 + out_signal[starting_point + k * 128 + 16 * 5 + 2] * 64 + out_signal[starting_point + k * 128 + 16 * 5 + 4] * 32 + out_signal[starting_point + k * 128 + 16 * 5 + 6] * 16 + out_signal[starting_point + k * 128 + 16 * 5 + 8] * 8 + out_signal[starting_point + k * 128 + 16 * 5 + 10] * 4 + out_signal[starting_point + k * 128 + 16 * 5 + 12] * 2 + out_signal[starting_point + k * 128 + 16 * 5 + 14] * 1);
-				rat2_ch6[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 5 + 1] * 128 + out_signal[starting_point + k * 128 + 16 * 5 + 3] * 64 + out_signal[starting_point + k * 128 + 16 * 5 + 5] * 32 + out_signal[starting_point + k * 128 + 16 * 5 + 7] * 16 + out_signal[starting_point + k * 128 + 16 * 5 + 9] * 8 + out_signal[starting_point + k * 128 + 16 * 5 + 11] * 4 + out_signal[starting_point + k * 128 + 16 * 5 + 13] * 2 + out_signal[starting_point + k * 128 + 16 * 5 + 15] * 1);
-				rat1_ch7[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 6] * 128 + out_signal[starting_point + k * 128 + 16 * 6 + 2] * 64 + out_signal[starting_point + k * 128 + 16 * 6 + 4] * 32 + out_signal[starting_point + k * 128 + 16 * 6 + 6] * 16 + out_signal[starting_point + k * 128 + 16 * 6 + 8] * 8 + out_signal[starting_point + k * 128 + 16 * 6 + 10] * 4 + out_signal[starting_point + k * 128 + 16 * 6 + 12] * 2 + out_signal[starting_point + k * 128 + 16 * 6 + 14] * 1);
-				rat2_ch7[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 6 + 1] * 128 + out_signal[starting_point + k * 128 + 16 * 6 + 3] * 64 + out_signal[starting_point + k * 128 + 16 * 6 + 5] * 32 + out_signal[starting_point + k * 128 + 16 * 6 + 7] * 16 + out_signal[starting_point + k * 128 + 16 * 6 + 9] * 8 + out_signal[starting_point + k * 128 + 16 * 6 + 11] * 4 + out_signal[starting_point + k * 128 + 16 * 6 + 13] * 2 + out_signal[starting_point + k * 128 + 16 * 6 + 15] * 1);
-				rat1_ch8[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 7] * 128 + out_signal[starting_point + k * 128 + 16 * 7 + 2] * 64 + out_signal[starting_point + k * 128 + 16 * 7 + 4] * 32 + out_signal[starting_point + k * 128 + 16 * 7 + 6] * 16 + out_signal[starting_point + k * 128 + 16 * 7 + 8] * 8 + out_signal[starting_point + k * 128 + 16 * 7 + 10] * 4 + out_signal[starting_point + k * 128 + 16 * 7 + 12] * 2 + out_signal[starting_point + k * 128 + 16 * 7 + 14] * 1);
-				rat2_ch8[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 7 + 1] * 128 + out_signal[starting_point + k * 128 + 16 * 7 + 3] * 64 + out_signal[starting_point + k * 128 + 16 * 7 + 5] * 32 + out_signal[starting_point + k * 128 + 16 * 7 + 7] * 16 + out_signal[starting_point + k * 128 + 16 * 7 + 9] * 8 + out_signal[starting_point + k * 128 + 16 * 7 + 11] * 4 + out_signal[starting_point + k * 128 + 16 * 7 + 13] * 2 + out_signal[starting_point + k * 128 + 16 * 7 + 15] * 1);
-				//printf("rat1_ch1 value = %d ", rat1_ch1[k]);
-				k = k + 1;
-			}
-
-		}
-
-		else {
-			while (CHANNEL_NUM*BITS_NUM*(k + 1) < processed_signal_size) {
-				rat1_ch1[k] = (uint8_t)(out_signal[starting_point + k * 128] * 128 + out_signal[starting_point + k * 128 + 2] * 64 + out_signal[starting_point + k * 128 + 4] * 32 + out_signal[starting_point + k * 128 + 6] * 16 + out_signal[starting_point + k * 128 + 8] * 8 + out_signal[starting_point + k * 128 + 10] * 4 + out_signal[starting_point + k * 128 + 12] * 2 + out_signal[starting_point + k * 128 + 14] * 1);
-				rat2_ch1[k] = (uint8_t)(out_signal[starting_point + k * 128 + 1] * 128 + out_signal[starting_point + k * 128 + 3] * 64 + out_signal[starting_point + k * 128 + 5] * 32 + out_signal[starting_point + k * 128 + 7] * 16 + out_signal[starting_point + k * 128 + 9] * 8 + out_signal[starting_point + k * 128 + 11] * 4 + out_signal[starting_point + k * 128 + 13] * 2 + out_signal[starting_point + k * 128 + 15] * 1);
-				rat1_ch2[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16] * 128 + out_signal[starting_point + k * 128 + 16 + 2] * 64 + out_signal[starting_point + k * 128 + 16 + 4] * 32 + out_signal[starting_point + k * 128 + 16 + 6] * 16 + out_signal[starting_point + k * 128 + 16 + 8] * 8 + out_signal[starting_point + k * 128 + 16 + 10] * 4 + out_signal[starting_point + k * 128 + 16 + 12] * 2 + out_signal[starting_point + k * 128 + 16 + 14] * 1);
-				rat2_ch2[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 + 1] * 128 + out_signal[starting_point + k * 128 + 16 + 3] * 64 + out_signal[starting_point + k * 128 + 16 + 5] * 32 + out_signal[starting_point + k * 128 + 16 + 7] * 16 + out_signal[starting_point + k * 128 + 16 + 9] * 8 + out_signal[starting_point + k * 128 + 16 + 11] * 4 + out_signal[starting_point + k * 128 + 16 + 13] * 2 + out_signal[starting_point + k * 128 + 16 + 15] * 1);
-				rat1_ch3[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 2] * 128 + out_signal[starting_point + k * 128 + 16 * 2 + 2] * 64 + out_signal[starting_point + k * 128 + 16 * 2 + 4] * 32 + out_signal[starting_point + k * 128 + 16 * 2 + 6] * 16 + out_signal[starting_point + k * 128 + 16 * 2 + 8] * 8 + out_signal[starting_point + k * 128 + 16 * 2 + 10] * 4 + out_signal[starting_point + k * 128 + 16 * 2 + 12] * 2 + out_signal[starting_point + k * 128 + 16 * 2 + 14] * 1);
-				rat2_ch3[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 2 + 1] * 128 + out_signal[starting_point + k * 128 + 16 * 2 + 3] * 64 + out_signal[starting_point + k * 128 + 16 * 2 + 5] * 32 + out_signal[starting_point + k * 128 + 16 * 2 + 7] * 16 + out_signal[starting_point + k * 128 + 16 * 2 + 9] * 8 + out_signal[starting_point + k * 128 + 16 * 2 + 11] * 4 + out_signal[starting_point + k * 128 + 16 * 2 + 13] * 2 + out_signal[starting_point + k * 128 + 16 * 2 + 15] * 1);
-				rat1_ch4[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 3] * 128 + out_signal[starting_point + k * 128 + 16 * 3 + 2] * 64 + out_signal[starting_point + k * 128 + 16 * 3 + 4] * 32 + out_signal[starting_point + k * 128 + 16 * 3 + 6] * 16 + out_signal[starting_point + k * 128 + 16 * 3 + 8] * 8 + out_signal[starting_point + k * 128 + 16 * 3 + 10] * 4 + out_signal[starting_point + k * 128 + 16 * 3 + 12] * 2 + out_signal[starting_point + k * 128 + 16 * 3 + 14] * 1);
-				rat2_ch4[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 3 + 1] * 128 + out_signal[starting_point + k * 128 + 16 * 3 + 3] * 64 + out_signal[starting_point + k * 128 + 16 * 3 + 5] * 32 + out_signal[starting_point + k * 128 + 16 * 3 + 7] * 16 + out_signal[starting_point + k * 128 + 16 * 3 + 9] * 8 + out_signal[starting_point + k * 128 + 16 * 3 + 11] * 4 + out_signal[starting_point + k * 128 + 16 * 3 + 13] * 2 + out_signal[starting_point + k * 128 + 16 * 3 + 15] * 1);
-				rat1_ch5[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 4] * 128 + out_signal[starting_point + k * 128 + 16 * 4 + 2] * 64 + out_signal[starting_point + k * 128 + 16 * 4 + 4] * 32 + out_signal[starting_point + k * 128 + 16 * 4 + 6] * 16 + out_signal[starting_point + k * 128 + 16 * 4 + 8] * 8 + out_signal[starting_point + k * 128 + 16 * 4 + 10] * 4 + out_signal[starting_point + k * 128 + 16 * 4 + 12] * 2 + out_signal[starting_point + k * 128 + 16 * 4 + 14] * 1);
-				rat2_ch5[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 4 + 1] * 128 + out_signal[starting_point + k * 128 + 16 * 4 + 3] * 64 + out_signal[starting_point + k * 128 + 16 * 4 + 5] * 32 + out_signal[starting_point + k * 128 + 16 * 4 + 7] * 16 + out_signal[starting_point + k * 128 + 16 * 4 + 9] * 8 + out_signal[starting_point + k * 128 + 16 * 4 + 11] * 4 + out_signal[starting_point + k * 128 + 16 * 4 + 13] * 2 + out_signal[starting_point + k * 128 + 16 * 4 + 15] * 1);
-				rat1_ch6[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 5] * 128 + out_signal[starting_point + k * 128 + 16 * 5 + 2] * 64 + out_signal[starting_point + k * 128 + 16 * 5 + 4] * 32 + out_signal[starting_point + k * 128 + 16 * 5 + 6] * 16 + out_signal[starting_point + k * 128 + 16 * 5 + 8] * 8 + out_signal[starting_point + k * 128 + 16 * 5 + 10] * 4 + out_signal[starting_point + k * 128 + 16 * 5 + 12] * 2 + out_signal[starting_point + k * 128 + 16 * 5 + 14] * 1);
-				rat2_ch6[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 5 + 1] * 128 + out_signal[starting_point + k * 128 + 16 * 5 + 3] * 64 + out_signal[starting_point + k * 128 + 16 * 5 + 5] * 32 + out_signal[starting_point + k * 128 + 16 * 5 + 7] * 16 + out_signal[starting_point + k * 128 + 16 * 5 + 9] * 8 + out_signal[starting_point + k * 128 + 16 * 5 + 11] * 4 + out_signal[starting_point + k * 128 + 16 * 5 + 13] * 2 + out_signal[starting_point + k * 128 + 16 * 5 + 15] * 1);
-				rat1_ch7[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 6] * 128 + out_signal[starting_point + k * 128 + 16 * 6 + 2] * 64 + out_signal[starting_point + k * 128 + 16 * 6 + 4] * 32 + out_signal[starting_point + k * 128 + 16 * 6 + 6] * 16 + out_signal[starting_point + k * 128 + 16 * 6 + 8] * 8 + out_signal[starting_point + k * 128 + 16 * 6 + 10] * 4 + out_signal[starting_point + k * 128 + 16 * 6 + 12] * 2 + out_signal[starting_point + k * 128 + 16 * 6 + 14] * 1);
-				rat2_ch7[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 6 + 1] * 128 + out_signal[starting_point + k * 128 + 16 * 6 + 3] * 64 + out_signal[starting_point + k * 128 + 16 * 6 + 5] * 32 + out_signal[starting_point + k * 128 + 16 * 6 + 7] * 16 + out_signal[starting_point + k * 128 + 16 * 6 + 9] * 8 + out_signal[starting_point + k * 128 + 16 * 6 + 11] * 4 + out_signal[starting_point + k * 128 + 16 * 6 + 13] * 2 + out_signal[starting_point + k * 128 + 16 * 6 + 15] * 1);
-				rat1_ch8[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 7] * 128 + out_signal[starting_point + k * 128 + 16 * 7 + 2] * 64 + out_signal[starting_point + k * 128 + 16 * 7 + 4] * 32 + out_signal[starting_point + k * 128 + 16 * 7 + 6] * 16 + out_signal[starting_point + k * 128 + 16 * 7 + 8] * 8 + out_signal[starting_point + k * 128 + 16 * 7 + 10] * 4 + out_signal[starting_point + k * 128 + 16 * 7 + 12] * 2 + out_signal[starting_point + k * 128 + 16 * 7 + 14] * 1);
-				rat2_ch8[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 7 + 1] * 128 + out_signal[starting_point + k * 128 + 16 * 7 + 3] * 64 + out_signal[starting_point + k * 128 + 16 * 7 + 5] * 32 + out_signal[starting_point + k * 128 + 16 * 7 + 7] * 16 + out_signal[starting_point + k * 128 + 16 * 7 + 9] * 8 + out_signal[starting_point + k * 128 + 16 * 7 + 11] * 4 + out_signal[starting_point + k * 128 + 16 * 7 + 13] * 2 + out_signal[starting_point + k * 128 + 16 * 7 + 15] * 1);
-				//printf("rat1_ch1 value = %d ", rat1_ch1[k]);
-				k = k + 1;
+					}
+					third_1_cnt = 0;
+					third_0_cnt = 0;
+				}
 			}
 		}
 
+		if (recording_flag == 1) {
+			//*************signal separation rat1, rat2 and 8 channels**************//
+			const static int CHANNEL_NUM = 8;
+			const static int BITS_NUM = 8 * 2;
+			static int starting_point = 0;
+			int k = 0;
+			uint8_t* tmp_full_storage = (uint8_t*)malloc(128 * sizeof(uint8_t));
+			static uint8_t* tmp_storage = (uint8_t*)malloc(128 * (sizeof(uint8_t)));
 
-		starting_point = (starting_point + processed_signal_size) % 128;
-		memcpy(tmp_storage, out_signal + processed_signal_size - starting_point, starting_point);
+			//define T(matlab array)
+			mxArray *T_RAT1_CH1 = NULL; mxArray *T_RAT2_CH1 = NULL;
+			mxArray *T_RAT1_CH2 = NULL; mxArray *T_RAT2_CH2 = NULL;
+			mxArray *T_RAT1_CH3 = NULL; mxArray *T_RAT2_CH3 = NULL;
+			mxArray *T_RAT1_CH4 = NULL; mxArray *T_RAT2_CH4 = NULL;
+			mxArray *T_RAT1_CH5 = NULL; mxArray *T_RAT2_CH5 = NULL;
+			mxArray *T_RAT1_CH6 = NULL; mxArray *T_RAT2_CH6 = NULL;
+			mxArray *T_RAT1_CH7 = NULL; mxArray *T_RAT2_CH7 = NULL;
+			mxArray *T_RAT1_CH8 = NULL; mxArray *T_RAT2_CH8 = NULL;
 
-		//printf("rat1_ch1 value = %d ", rat1_ch1[k]);
+			uint8_t* rat1_ch1 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+			uint8_t* rat2_ch1 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+			uint8_t* rat1_ch2 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+			uint8_t* rat2_ch2 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+			uint8_t* rat1_ch3 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+			uint8_t* rat2_ch3 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+			uint8_t* rat1_ch4 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+			uint8_t* rat2_ch4 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+			uint8_t* rat1_ch5 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+			uint8_t* rat2_ch5 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+			uint8_t* rat1_ch6 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+			uint8_t* rat2_ch6 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+			uint8_t* rat1_ch7 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+			uint8_t* rat2_ch7 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+			uint8_t* rat1_ch8 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
+			uint8_t* rat2_ch8 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
 
-		
+			const size_t rat1_ch1_dims[2] = { (int)(processed_signal_size / BITS_NUM / 8), 1 };
+			T_RAT1_CH1 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+			T_RAT2_CH1 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+			T_RAT1_CH2 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+			T_RAT2_CH2 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+			T_RAT1_CH3 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+			T_RAT2_CH3 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+			T_RAT1_CH4 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+			T_RAT2_CH4 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+			T_RAT1_CH5 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+			T_RAT2_CH5 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+			T_RAT1_CH6 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+			T_RAT2_CH6 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+			T_RAT1_CH7 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+			T_RAT2_CH7 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+			T_RAT1_CH8 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
+			T_RAT2_CH8 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
 
-		//copy signal_int16 to T		
-		//int16_t* signal_int16 = (int16_t *)malloc(pstBufferData->dwDataNotify);
-		
+			rat1_ch1 = (uint8_t *)mxGetData(T_RAT1_CH1); rat2_ch1 = (uint8_t *)mxGetData(T_RAT2_CH1);
+			rat1_ch2 = (uint8_t *)mxGetData(T_RAT1_CH2); rat2_ch2 = (uint8_t *)mxGetData(T_RAT2_CH2);
+			rat1_ch3 = (uint8_t *)mxGetData(T_RAT1_CH3); rat2_ch3 = (uint8_t *)mxGetData(T_RAT2_CH3);
+			rat1_ch4 = (uint8_t *)mxGetData(T_RAT1_CH4); rat2_ch4 = (uint8_t *)mxGetData(T_RAT2_CH4);
+			rat1_ch5 = (uint8_t *)mxGetData(T_RAT1_CH5); rat2_ch5 = (uint8_t *)mxGetData(T_RAT2_CH5);
+			rat1_ch6 = (uint8_t *)mxGetData(T_RAT1_CH6); rat2_ch6 = (uint8_t *)mxGetData(T_RAT2_CH6);
+			rat1_ch7 = (uint8_t *)mxGetData(T_RAT1_CH7); rat2_ch7 = (uint8_t *)mxGetData(T_RAT2_CH7);
+			rat1_ch8 = (uint8_t *)mxGetData(T_RAT1_CH8); rat2_ch8 = (uint8_t *)mxGetData(T_RAT2_CH8);
 
+			//main procedure of decoding from CDMA encoded signal
+			memcpy(tmp_full_storage, tmp_storage, starting_point);
+			memcpy(tmp_full_storage + starting_point, out_signal, 128 - starting_point);
 
-		//memcpy(signal_int16, pstBufferData->pvDataCurrentBuf, (pstBufferData->dwDataNotify));
+			if (starting_point != 0) {
+				rat1_ch1[0] = tmp_full_storage[0] * 128 + tmp_full_storage[2] * 64 + tmp_full_storage[4] * 32 + tmp_full_storage[6] * 16 + tmp_full_storage[8] * 8 + tmp_full_storage[10] * 4 + tmp_full_storage[12] * 2 + tmp_full_storage[14] * 1;
+				rat2_ch1[0] = tmp_full_storage[0 + 1] * 128 + tmp_full_storage[2 + 1] * 64 + tmp_full_storage[4 + 1] * 32 + tmp_full_storage[6 + 1] * 16 + tmp_full_storage[8 + 1] * 8 + tmp_full_storage[10 + 1] * 4 + tmp_full_storage[12 + 1] * 2 + tmp_full_storage[14 + 1] * 1;
+				rat1_ch2[0] = tmp_full_storage[16 * 1 + 0] * 128 + tmp_full_storage[16 * 1 + 2] * 64 + tmp_full_storage[16 * 1 + 4] * 32 + tmp_full_storage[16 * 1 + 6] * 16 + tmp_full_storage[16 * 1 + 8] * 8 + tmp_full_storage[16 * 1 + 10] * 4 + tmp_full_storage[16 * 1 + 12] * 2 + tmp_full_storage[16 * 1 + 14] * 1;
+				rat2_ch2[0] = tmp_full_storage[16 * 1 + 0 + 1] * 128 + tmp_full_storage[16 * 1 + 2 + 1] * 64 + tmp_full_storage[16 * 1 + 4 + 1] * 32 + tmp_full_storage[16 * 1 + 6 + 1] * 16 + tmp_full_storage[16 * 1 + 8 + 1] * 8 + tmp_full_storage[16 * 1 + 10 + 1] * 4 + tmp_full_storage[16 * 1 + 12 + 1] * 2 + tmp_full_storage[16 * 1 + 14 + 1] * 1;
+				rat1_ch3[0] = tmp_full_storage[16 * 2 + 0] * 128 + tmp_full_storage[16 * 2 + 2] * 64 + tmp_full_storage[16 * 2 + 4] * 32 + tmp_full_storage[16 * 2 + 6] * 16 + tmp_full_storage[16 * 2 + 8] * 8 + tmp_full_storage[16 * 2 + 10] * 4 + tmp_full_storage[16 * 2 + 12] * 2 + tmp_full_storage[16 * 2 + 14] * 1;
+				rat2_ch3[0] = tmp_full_storage[16 * 2 + 0 + 1] * 128 + tmp_full_storage[16 * 2 + 2 + 1] * 64 + tmp_full_storage[16 * 2 + 4 + 1] * 32 + tmp_full_storage[16 * 2 + 6 + 1] * 16 + tmp_full_storage[16 * 2 + 8 + 1] * 8 + tmp_full_storage[16 * 2 + 10 + 1] * 4 + tmp_full_storage[16 * 2 + 12 + 1] * 2 + tmp_full_storage[16 * 2 + 14 + 1] * 1;
+				rat1_ch4[0] = tmp_full_storage[16 * 3 + 0] * 128 + tmp_full_storage[16 * 3 + 2] * 64 + tmp_full_storage[16 * 3 + 4] * 32 + tmp_full_storage[16 * 3 + 6] * 16 + tmp_full_storage[16 * 3 + 8] * 8 + tmp_full_storage[16 * 3 + 10] * 4 + tmp_full_storage[16 * 3 + 12] * 2 + tmp_full_storage[16 * 3 + 14] * 1;
+				rat2_ch4[0] = tmp_full_storage[16 * 3 + 0 + 1] * 128 + tmp_full_storage[16 * 3 + 2 + 1] * 64 + tmp_full_storage[16 * 3 + 4 + 1] * 32 + tmp_full_storage[16 * 3 + 6 + 1] * 16 + tmp_full_storage[16 * 3 + 8 + 1] * 8 + tmp_full_storage[16 * 3 + 10 + 1] * 4 + tmp_full_storage[16 * 3 + 12 + 1] * 2 + tmp_full_storage[16 * 3 + 14 + 1] * 1;
+				rat1_ch5[0] = tmp_full_storage[16 * 4 + 0] * 128 + tmp_full_storage[16 * 4 + 2] * 64 + tmp_full_storage[16 * 4 + 4] * 32 + tmp_full_storage[16 * 4 + 6] * 16 + tmp_full_storage[16 * 4 + 8] * 8 + tmp_full_storage[16 * 4 + 10] * 4 + tmp_full_storage[16 * 4 + 12] * 2 + tmp_full_storage[16 * 4 + 14] * 1;
+				rat2_ch5[0] = tmp_full_storage[16 * 4 + 0 + 1] * 128 + tmp_full_storage[16 * 4 + 2 + 1] * 64 + tmp_full_storage[16 * 4 + 4 + 1] * 32 + tmp_full_storage[16 * 4 + 6 + 1] * 16 + tmp_full_storage[16 * 4 + 8 + 1] * 8 + tmp_full_storage[16 * 4 + 10 + 1] * 4 + tmp_full_storage[16 * 4 + 12 + 1] * 2 + tmp_full_storage[16 * 4 + 14 + 1] * 1;
+				rat1_ch6[0] = tmp_full_storage[16 * 5 + 0] * 128 + tmp_full_storage[16 * 5 + 2] * 64 + tmp_full_storage[16 * 5 + 4] * 32 + tmp_full_storage[16 * 5 + 6] * 16 + tmp_full_storage[16 * 5 + 8] * 8 + tmp_full_storage[16 * 5 + 10] * 4 + tmp_full_storage[16 * 5 + 12] * 2 + tmp_full_storage[16 * 5 + 14] * 1;
+				rat2_ch6[0] = tmp_full_storage[16 * 5 + 0 + 1] * 128 + tmp_full_storage[16 * 5 + 2 + 1] * 64 + tmp_full_storage[16 * 5 + 4 + 1] * 32 + tmp_full_storage[16 * 5 + 6 + 1] * 16 + tmp_full_storage[16 * 5 + 8 + 1] * 8 + tmp_full_storage[16 * 5 + 10 + 1] * 4 + tmp_full_storage[16 * 5 + 12 + 1] * 2 + tmp_full_storage[16 * 5 + 14 + 1] * 1;
+				rat1_ch7[0] = tmp_full_storage[16 * 6 + 0] * 128 + tmp_full_storage[16 * 6 + 2] * 64 + tmp_full_storage[16 * 6 + 4] * 32 + tmp_full_storage[16 * 6 + 6] * 16 + tmp_full_storage[16 * 6 + 8] * 8 + tmp_full_storage[16 * 6 + 10] * 4 + tmp_full_storage[16 * 6 + 12] * 2 + tmp_full_storage[16 * 6 + 14] * 1;
+				rat2_ch7[0] = tmp_full_storage[16 * 6 + 0 + 1] * 128 + tmp_full_storage[16 * 6 + 2 + 1] * 64 + tmp_full_storage[16 * 6 + 4 + 1] * 32 + tmp_full_storage[16 * 6 + 6 + 1] * 16 + tmp_full_storage[16 * 6 + 8 + 1] * 8 + tmp_full_storage[16 * 6 + 10 + 1] * 4 + tmp_full_storage[16 * 6 + 12 + 1] * 2 + tmp_full_storage[16 * 6 + 14 + 1] * 1;
+				rat1_ch8[0] = tmp_full_storage[16 * 7 + 0] * 128 + tmp_full_storage[16 * 7 + 2] * 64 + tmp_full_storage[16 * 7 + 4] * 32 + tmp_full_storage[16 * 7 + 6] * 16 + tmp_full_storage[16 * 7 + 8] * 8 + tmp_full_storage[16 * 7 + 10] * 4 + tmp_full_storage[16 * 7 + 12] * 2 + tmp_full_storage[16 * 7 + 14] * 1;
+				rat2_ch8[0] = tmp_full_storage[16 * 7 + 0 + 1] * 128 + tmp_full_storage[16 * 7 + 2 + 1] * 64 + tmp_full_storage[16 * 7 + 4 + 1] * 32 + tmp_full_storage[16 * 7 + 6 + 1] * 16 + tmp_full_storage[16 * 7 + 8 + 1] * 8 + tmp_full_storage[16 * 7 + 10 + 1] * 4 + tmp_full_storage[16 * 7 + 12 + 1] * 2 + tmp_full_storage[16 * 7 + 14 + 1] * 1;
 
-		//print T using matlab
-		engPutVariable(ep, "T_RAT1_CH1", T_RAT1_CH1); engPutVariable(ep, "T_RAT2_CH1", T_RAT2_CH1);
-		engPutVariable(ep, "T_RAT1_CH2", T_RAT1_CH2); engPutVariable(ep, "T_RAT2_CH2", T_RAT2_CH2);
-		engPutVariable(ep, "T_RAT1_CH3", T_RAT1_CH3); engPutVariable(ep, "T_RAT2_CH3", T_RAT2_CH3);
-		engPutVariable(ep, "T_RAT1_CH4", T_RAT1_CH4); engPutVariable(ep, "T_RAT2_CH4", T_RAT2_CH4);
-		engPutVariable(ep, "T_RAT1_CH5", T_RAT1_CH5); engPutVariable(ep, "T_RAT2_CH5", T_RAT2_CH5);
-		engPutVariable(ep, "T_RAT1_CH6", T_RAT1_CH6); engPutVariable(ep, "T_RAT2_CH6", T_RAT2_CH6);
-		engPutVariable(ep, "T_RAT1_CH7", T_RAT1_CH7); engPutVariable(ep, "T_RAT2_CH7", T_RAT2_CH7);
-		engPutVariable(ep, "T_RAT1_CH8", T_RAT1_CH8); engPutVariable(ep, "T_RAT2_CH8", T_RAT2_CH8);
-		//engEvalString(ep, "control_val = 50");
-		engEvalString(ep, "x1 = T_RAT1_CH1(1:end);"); engEvalString(ep, "x2 = T_RAT2_CH1(1:end);");
-		engEvalString(ep, "x3 = T_RAT1_CH2(1:end);"); engEvalString(ep, "x4 = T_RAT2_CH2(1:end);");
-		engEvalString(ep, "x5 = T_RAT1_CH3(1:end);"); engEvalString(ep, "x6 = T_RAT2_CH3(1:end);");
-		engEvalString(ep, "x7 = T_RAT1_CH4(1:end);"); engEvalString(ep, "x8 = T_RAT2_CH4(1:end);");
-		engEvalString(ep, "x9 = T_RAT1_CH5(1:end);"); engEvalString(ep, "x10 = T_RAT2_CH5(1:end);");
-		engEvalString(ep, "x11 = T_RAT1_CH6(1:end);"); engEvalString(ep, "x12 = T_RAT2_CH6(1:end);");
-		engEvalString(ep, "x13 = T_RAT1_CH7(1:end);"); engEvalString(ep, "x14 = T_RAT2_CH7(1:end);");
-		engEvalString(ep, "x15 = T_RAT1_CH8(1:end);"); engEvalString(ep, "x16 = T_RAT2_CH8(1:end);");
+				while (CHANNEL_NUM*BITS_NUM*(k + 2) < processed_signal_size) {
+					rat1_ch1[k + 1] = (uint8_t)(out_signal[starting_point + k * 128] * 128 + out_signal[starting_point + k * 128 + 2] * 64 + out_signal[starting_point + k * 128 + 4] * 32 + out_signal[starting_point + k * 128 + 6] * 16 + out_signal[starting_point + k * 128 + 8] * 8 + out_signal[starting_point + k * 128 + 10] * 4 + out_signal[starting_point + k * 128 + 12] * 2 + out_signal[starting_point + k * 128 + 14] * 1);
+					rat2_ch1[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 1] * 128 + out_signal[starting_point + k * 128 + 3] * 64 + out_signal[starting_point + k * 128 + 5] * 32 + out_signal[starting_point + k * 128 + 7] * 16 + out_signal[starting_point + k * 128 + 9] * 8 + out_signal[starting_point + k * 128 + 11] * 4 + out_signal[starting_point + k * 128 + 13] * 2 + out_signal[starting_point + k * 128 + 15] * 1);
+					rat1_ch2[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16] * 128 + out_signal[starting_point + k * 128 + 16 + 2] * 64 + out_signal[starting_point + k * 128 + 16 + 4] * 32 + out_signal[starting_point + k * 128 + 16 + 6] * 16 + out_signal[starting_point + k * 128 + 16 + 8] * 8 + out_signal[starting_point + k * 128 + 16 + 10] * 4 + out_signal[starting_point + k * 128 + 16 + 12] * 2 + out_signal[starting_point + k * 128 + 16 + 14] * 1);
+					rat2_ch2[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 + 1] * 128 + out_signal[starting_point + k * 128 + 16 + 3] * 64 + out_signal[starting_point + k * 128 + 16 + 5] * 32 + out_signal[starting_point + k * 128 + 16 + 7] * 16 + out_signal[starting_point + k * 128 + 16 + 9] * 8 + out_signal[starting_point + k * 128 + 16 + 11] * 4 + out_signal[starting_point + k * 128 + 16 + 13] * 2 + out_signal[starting_point + k * 128 + 16 + 15] * 1);
+					rat1_ch3[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 2] * 128 + out_signal[starting_point + k * 128 + 16 * 2 + 2] * 64 + out_signal[starting_point + k * 128 + 16 * 2 + 4] * 32 + out_signal[starting_point + k * 128 + 16 * 2 + 6] * 16 + out_signal[starting_point + k * 128 + 16 * 2 + 8] * 8 + out_signal[starting_point + k * 128 + 16 * 2 + 10] * 4 + out_signal[starting_point + k * 128 + 16 * 2 + 12] * 2 + out_signal[starting_point + k * 128 + 16 * 2 + 14] * 1);
+					rat2_ch3[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 2 + 1] * 128 + out_signal[starting_point + k * 128 + 16 * 2 + 3] * 64 + out_signal[starting_point + k * 128 + 16 * 2 + 5] * 32 + out_signal[starting_point + k * 128 + 16 * 2 + 7] * 16 + out_signal[starting_point + k * 128 + 16 * 2 + 9] * 8 + out_signal[starting_point + k * 128 + 16 * 2 + 11] * 4 + out_signal[starting_point + k * 128 + 16 * 2 + 13] * 2 + out_signal[starting_point + k * 128 + 16 * 2 + 15] * 1);
+					rat1_ch4[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 3] * 128 + out_signal[starting_point + k * 128 + 16 * 3 + 2] * 64 + out_signal[starting_point + k * 128 + 16 * 3 + 4] * 32 + out_signal[starting_point + k * 128 + 16 * 3 + 6] * 16 + out_signal[starting_point + k * 128 + 16 * 3 + 8] * 8 + out_signal[starting_point + k * 128 + 16 * 3 + 10] * 4 + out_signal[starting_point + k * 128 + 16 * 3 + 12] * 2 + out_signal[starting_point + k * 128 + 16 * 3 + 14] * 1);
+					rat2_ch4[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 3 + 1] * 128 + out_signal[starting_point + k * 128 + 16 * 3 + 3] * 64 + out_signal[starting_point + k * 128 + 16 * 3 + 5] * 32 + out_signal[starting_point + k * 128 + 16 * 3 + 7] * 16 + out_signal[starting_point + k * 128 + 16 * 3 + 9] * 8 + out_signal[starting_point + k * 128 + 16 * 3 + 11] * 4 + out_signal[starting_point + k * 128 + 16 * 3 + 13] * 2 + out_signal[starting_point + k * 128 + 16 * 3 + 15] * 1);
+					rat1_ch5[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 4] * 128 + out_signal[starting_point + k * 128 + 16 * 4 + 2] * 64 + out_signal[starting_point + k * 128 + 16 * 4 + 4] * 32 + out_signal[starting_point + k * 128 + 16 * 4 + 6] * 16 + out_signal[starting_point + k * 128 + 16 * 4 + 8] * 8 + out_signal[starting_point + k * 128 + 16 * 4 + 10] * 4 + out_signal[starting_point + k * 128 + 16 * 4 + 12] * 2 + out_signal[starting_point + k * 128 + 16 * 4 + 14] * 1);
+					rat2_ch5[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 4 + 1] * 128 + out_signal[starting_point + k * 128 + 16 * 4 + 3] * 64 + out_signal[starting_point + k * 128 + 16 * 4 + 5] * 32 + out_signal[starting_point + k * 128 + 16 * 4 + 7] * 16 + out_signal[starting_point + k * 128 + 16 * 4 + 9] * 8 + out_signal[starting_point + k * 128 + 16 * 4 + 11] * 4 + out_signal[starting_point + k * 128 + 16 * 4 + 13] * 2 + out_signal[starting_point + k * 128 + 16 * 4 + 15] * 1);
+					rat1_ch6[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 5] * 128 + out_signal[starting_point + k * 128 + 16 * 5 + 2] * 64 + out_signal[starting_point + k * 128 + 16 * 5 + 4] * 32 + out_signal[starting_point + k * 128 + 16 * 5 + 6] * 16 + out_signal[starting_point + k * 128 + 16 * 5 + 8] * 8 + out_signal[starting_point + k * 128 + 16 * 5 + 10] * 4 + out_signal[starting_point + k * 128 + 16 * 5 + 12] * 2 + out_signal[starting_point + k * 128 + 16 * 5 + 14] * 1);
+					rat2_ch6[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 5 + 1] * 128 + out_signal[starting_point + k * 128 + 16 * 5 + 3] * 64 + out_signal[starting_point + k * 128 + 16 * 5 + 5] * 32 + out_signal[starting_point + k * 128 + 16 * 5 + 7] * 16 + out_signal[starting_point + k * 128 + 16 * 5 + 9] * 8 + out_signal[starting_point + k * 128 + 16 * 5 + 11] * 4 + out_signal[starting_point + k * 128 + 16 * 5 + 13] * 2 + out_signal[starting_point + k * 128 + 16 * 5 + 15] * 1);
+					rat1_ch7[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 6] * 128 + out_signal[starting_point + k * 128 + 16 * 6 + 2] * 64 + out_signal[starting_point + k * 128 + 16 * 6 + 4] * 32 + out_signal[starting_point + k * 128 + 16 * 6 + 6] * 16 + out_signal[starting_point + k * 128 + 16 * 6 + 8] * 8 + out_signal[starting_point + k * 128 + 16 * 6 + 10] * 4 + out_signal[starting_point + k * 128 + 16 * 6 + 12] * 2 + out_signal[starting_point + k * 128 + 16 * 6 + 14] * 1);
+					rat2_ch7[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 6 + 1] * 128 + out_signal[starting_point + k * 128 + 16 * 6 + 3] * 64 + out_signal[starting_point + k * 128 + 16 * 6 + 5] * 32 + out_signal[starting_point + k * 128 + 16 * 6 + 7] * 16 + out_signal[starting_point + k * 128 + 16 * 6 + 9] * 8 + out_signal[starting_point + k * 128 + 16 * 6 + 11] * 4 + out_signal[starting_point + k * 128 + 16 * 6 + 13] * 2 + out_signal[starting_point + k * 128 + 16 * 6 + 15] * 1);
+					rat1_ch8[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 7] * 128 + out_signal[starting_point + k * 128 + 16 * 7 + 2] * 64 + out_signal[starting_point + k * 128 + 16 * 7 + 4] * 32 + out_signal[starting_point + k * 128 + 16 * 7 + 6] * 16 + out_signal[starting_point + k * 128 + 16 * 7 + 8] * 8 + out_signal[starting_point + k * 128 + 16 * 7 + 10] * 4 + out_signal[starting_point + k * 128 + 16 * 7 + 12] * 2 + out_signal[starting_point + k * 128 + 16 * 7 + 14] * 1);
+					rat2_ch8[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 7 + 1] * 128 + out_signal[starting_point + k * 128 + 16 * 7 + 3] * 64 + out_signal[starting_point + k * 128 + 16 * 7 + 5] * 32 + out_signal[starting_point + k * 128 + 16 * 7 + 7] * 16 + out_signal[starting_point + k * 128 + 16 * 7 + 9] * 8 + out_signal[starting_point + k * 128 + 16 * 7 + 11] * 4 + out_signal[starting_point + k * 128 + 16 * 7 + 13] * 2 + out_signal[starting_point + k * 128 + 16 * 7 + 15] * 1);
+					//printf("rat1_ch1 value = %d ", rat1_ch1[k]);
+					k = k + 1;
+				}
+			}
 
-		engEvalString(ep, "figure(1)");
-		engEvalString(ep, "subplot(2,4,1);");
-		engEvalString(ep, "plot(x1);");
+			else {
+				while (CHANNEL_NUM*BITS_NUM*(k + 1) < processed_signal_size) {
+					rat1_ch1[k] = (uint8_t)(out_signal[starting_point + k * 128] * 128 + out_signal[starting_point + k * 128 + 2] * 64 + out_signal[starting_point + k * 128 + 4] * 32 + out_signal[starting_point + k * 128 + 6] * 16 + out_signal[starting_point + k * 128 + 8] * 8 + out_signal[starting_point + k * 128 + 10] * 4 + out_signal[starting_point + k * 128 + 12] * 2 + out_signal[starting_point + k * 128 + 14] * 1);
+					rat2_ch1[k] = (uint8_t)(out_signal[starting_point + k * 128 + 1] * 128 + out_signal[starting_point + k * 128 + 3] * 64 + out_signal[starting_point + k * 128 + 5] * 32 + out_signal[starting_point + k * 128 + 7] * 16 + out_signal[starting_point + k * 128 + 9] * 8 + out_signal[starting_point + k * 128 + 11] * 4 + out_signal[starting_point + k * 128 + 13] * 2 + out_signal[starting_point + k * 128 + 15] * 1);
+					rat1_ch2[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16] * 128 + out_signal[starting_point + k * 128 + 16 + 2] * 64 + out_signal[starting_point + k * 128 + 16 + 4] * 32 + out_signal[starting_point + k * 128 + 16 + 6] * 16 + out_signal[starting_point + k * 128 + 16 + 8] * 8 + out_signal[starting_point + k * 128 + 16 + 10] * 4 + out_signal[starting_point + k * 128 + 16 + 12] * 2 + out_signal[starting_point + k * 128 + 16 + 14] * 1);
+					rat2_ch2[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 + 1] * 128 + out_signal[starting_point + k * 128 + 16 + 3] * 64 + out_signal[starting_point + k * 128 + 16 + 5] * 32 + out_signal[starting_point + k * 128 + 16 + 7] * 16 + out_signal[starting_point + k * 128 + 16 + 9] * 8 + out_signal[starting_point + k * 128 + 16 + 11] * 4 + out_signal[starting_point + k * 128 + 16 + 13] * 2 + out_signal[starting_point + k * 128 + 16 + 15] * 1);
+					rat1_ch3[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 2] * 128 + out_signal[starting_point + k * 128 + 16 * 2 + 2] * 64 + out_signal[starting_point + k * 128 + 16 * 2 + 4] * 32 + out_signal[starting_point + k * 128 + 16 * 2 + 6] * 16 + out_signal[starting_point + k * 128 + 16 * 2 + 8] * 8 + out_signal[starting_point + k * 128 + 16 * 2 + 10] * 4 + out_signal[starting_point + k * 128 + 16 * 2 + 12] * 2 + out_signal[starting_point + k * 128 + 16 * 2 + 14] * 1);
+					rat2_ch3[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 2 + 1] * 128 + out_signal[starting_point + k * 128 + 16 * 2 + 3] * 64 + out_signal[starting_point + k * 128 + 16 * 2 + 5] * 32 + out_signal[starting_point + k * 128 + 16 * 2 + 7] * 16 + out_signal[starting_point + k * 128 + 16 * 2 + 9] * 8 + out_signal[starting_point + k * 128 + 16 * 2 + 11] * 4 + out_signal[starting_point + k * 128 + 16 * 2 + 13] * 2 + out_signal[starting_point + k * 128 + 16 * 2 + 15] * 1);
+					rat1_ch4[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 3] * 128 + out_signal[starting_point + k * 128 + 16 * 3 + 2] * 64 + out_signal[starting_point + k * 128 + 16 * 3 + 4] * 32 + out_signal[starting_point + k * 128 + 16 * 3 + 6] * 16 + out_signal[starting_point + k * 128 + 16 * 3 + 8] * 8 + out_signal[starting_point + k * 128 + 16 * 3 + 10] * 4 + out_signal[starting_point + k * 128 + 16 * 3 + 12] * 2 + out_signal[starting_point + k * 128 + 16 * 3 + 14] * 1);
+					rat2_ch4[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 3 + 1] * 128 + out_signal[starting_point + k * 128 + 16 * 3 + 3] * 64 + out_signal[starting_point + k * 128 + 16 * 3 + 5] * 32 + out_signal[starting_point + k * 128 + 16 * 3 + 7] * 16 + out_signal[starting_point + k * 128 + 16 * 3 + 9] * 8 + out_signal[starting_point + k * 128 + 16 * 3 + 11] * 4 + out_signal[starting_point + k * 128 + 16 * 3 + 13] * 2 + out_signal[starting_point + k * 128 + 16 * 3 + 15] * 1);
+					rat1_ch5[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 4] * 128 + out_signal[starting_point + k * 128 + 16 * 4 + 2] * 64 + out_signal[starting_point + k * 128 + 16 * 4 + 4] * 32 + out_signal[starting_point + k * 128 + 16 * 4 + 6] * 16 + out_signal[starting_point + k * 128 + 16 * 4 + 8] * 8 + out_signal[starting_point + k * 128 + 16 * 4 + 10] * 4 + out_signal[starting_point + k * 128 + 16 * 4 + 12] * 2 + out_signal[starting_point + k * 128 + 16 * 4 + 14] * 1);
+					rat2_ch5[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 4 + 1] * 128 + out_signal[starting_point + k * 128 + 16 * 4 + 3] * 64 + out_signal[starting_point + k * 128 + 16 * 4 + 5] * 32 + out_signal[starting_point + k * 128 + 16 * 4 + 7] * 16 + out_signal[starting_point + k * 128 + 16 * 4 + 9] * 8 + out_signal[starting_point + k * 128 + 16 * 4 + 11] * 4 + out_signal[starting_point + k * 128 + 16 * 4 + 13] * 2 + out_signal[starting_point + k * 128 + 16 * 4 + 15] * 1);
+					rat1_ch6[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 5] * 128 + out_signal[starting_point + k * 128 + 16 * 5 + 2] * 64 + out_signal[starting_point + k * 128 + 16 * 5 + 4] * 32 + out_signal[starting_point + k * 128 + 16 * 5 + 6] * 16 + out_signal[starting_point + k * 128 + 16 * 5 + 8] * 8 + out_signal[starting_point + k * 128 + 16 * 5 + 10] * 4 + out_signal[starting_point + k * 128 + 16 * 5 + 12] * 2 + out_signal[starting_point + k * 128 + 16 * 5 + 14] * 1);
+					rat2_ch6[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 5 + 1] * 128 + out_signal[starting_point + k * 128 + 16 * 5 + 3] * 64 + out_signal[starting_point + k * 128 + 16 * 5 + 5] * 32 + out_signal[starting_point + k * 128 + 16 * 5 + 7] * 16 + out_signal[starting_point + k * 128 + 16 * 5 + 9] * 8 + out_signal[starting_point + k * 128 + 16 * 5 + 11] * 4 + out_signal[starting_point + k * 128 + 16 * 5 + 13] * 2 + out_signal[starting_point + k * 128 + 16 * 5 + 15] * 1);
+					rat1_ch7[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 6] * 128 + out_signal[starting_point + k * 128 + 16 * 6 + 2] * 64 + out_signal[starting_point + k * 128 + 16 * 6 + 4] * 32 + out_signal[starting_point + k * 128 + 16 * 6 + 6] * 16 + out_signal[starting_point + k * 128 + 16 * 6 + 8] * 8 + out_signal[starting_point + k * 128 + 16 * 6 + 10] * 4 + out_signal[starting_point + k * 128 + 16 * 6 + 12] * 2 + out_signal[starting_point + k * 128 + 16 * 6 + 14] * 1);
+					rat2_ch7[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 6 + 1] * 128 + out_signal[starting_point + k * 128 + 16 * 6 + 3] * 64 + out_signal[starting_point + k * 128 + 16 * 6 + 5] * 32 + out_signal[starting_point + k * 128 + 16 * 6 + 7] * 16 + out_signal[starting_point + k * 128 + 16 * 6 + 9] * 8 + out_signal[starting_point + k * 128 + 16 * 6 + 11] * 4 + out_signal[starting_point + k * 128 + 16 * 6 + 13] * 2 + out_signal[starting_point + k * 128 + 16 * 6 + 15] * 1);
+					rat1_ch8[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 7] * 128 + out_signal[starting_point + k * 128 + 16 * 7 + 2] * 64 + out_signal[starting_point + k * 128 + 16 * 7 + 4] * 32 + out_signal[starting_point + k * 128 + 16 * 7 + 6] * 16 + out_signal[starting_point + k * 128 + 16 * 7 + 8] * 8 + out_signal[starting_point + k * 128 + 16 * 7 + 10] * 4 + out_signal[starting_point + k * 128 + 16 * 7 + 12] * 2 + out_signal[starting_point + k * 128 + 16 * 7 + 14] * 1);
+					rat2_ch8[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16 * 7 + 1] * 128 + out_signal[starting_point + k * 128 + 16 * 7 + 3] * 64 + out_signal[starting_point + k * 128 + 16 * 7 + 5] * 32 + out_signal[starting_point + k * 128 + 16 * 7 + 7] * 16 + out_signal[starting_point + k * 128 + 16 * 7 + 9] * 8 + out_signal[starting_point + k * 128 + 16 * 7 + 11] * 4 + out_signal[starting_point + k * 128 + 16 * 7 + 13] * 2 + out_signal[starting_point + k * 128 + 16 * 7 + 15] * 1);
+					//printf("rat1_ch1 value = %d ", rat1_ch1[k]);
+					k = k + 1;
+				}
+			}
+			starting_point = (starting_point + processed_signal_size) % 128;
+			memcpy(tmp_storage, out_signal + processed_signal_size - starting_point, starting_point);
 
-		engEvalString(ep, "subplot(2,4,2)");
-		engEvalString(ep, "plot(x3)");
+			//print T using matlab
+			engPutVariable(ep, "T_RAT1_CH1", T_RAT1_CH1); engPutVariable(ep, "T_RAT2_CH1", T_RAT2_CH1);
+			engPutVariable(ep, "T_RAT1_CH2", T_RAT1_CH2); engPutVariable(ep, "T_RAT2_CH2", T_RAT2_CH2);
+			engPutVariable(ep, "T_RAT1_CH3", T_RAT1_CH3); engPutVariable(ep, "T_RAT2_CH3", T_RAT2_CH3);
+			engPutVariable(ep, "T_RAT1_CH4", T_RAT1_CH4); engPutVariable(ep, "T_RAT2_CH4", T_RAT2_CH4);
+			engPutVariable(ep, "T_RAT1_CH5", T_RAT1_CH5); engPutVariable(ep, "T_RAT2_CH5", T_RAT2_CH5);
+			engPutVariable(ep, "T_RAT1_CH6", T_RAT1_CH6); engPutVariable(ep, "T_RAT2_CH6", T_RAT2_CH6);
+			engPutVariable(ep, "T_RAT1_CH7", T_RAT1_CH7); engPutVariable(ep, "T_RAT2_CH7", T_RAT2_CH7);
+			engPutVariable(ep, "T_RAT1_CH8", T_RAT1_CH8); engPutVariable(ep, "T_RAT2_CH8", T_RAT2_CH8);
+			//engEvalString(ep, "control_val = 50");
+			engEvalString(ep, "x1 = T_RAT1_CH1(1:end);"); engEvalString(ep, "x2 = T_RAT2_CH1(1:end);");
+			engEvalString(ep, "x3 = T_RAT1_CH2(1:end);"); engEvalString(ep, "x4 = T_RAT2_CH2(1:end);");
+			engEvalString(ep, "x5 = T_RAT1_CH3(1:end);"); engEvalString(ep, "x6 = T_RAT2_CH3(1:end);");
+			engEvalString(ep, "x7 = T_RAT1_CH4(1:end);"); engEvalString(ep, "x8 = T_RAT2_CH4(1:end);");
+			engEvalString(ep, "x9 = T_RAT1_CH5(1:end);"); engEvalString(ep, "x10 = T_RAT2_CH5(1:end);");
+			engEvalString(ep, "x11 = T_RAT1_CH6(1:end);"); engEvalString(ep, "x12 = T_RAT2_CH6(1:end);");
+			engEvalString(ep, "x13 = T_RAT1_CH7(1:end);"); engEvalString(ep, "x14 = T_RAT2_CH7(1:end);");
+			engEvalString(ep, "x15 = T_RAT1_CH8(1:end);"); engEvalString(ep, "x16 = T_RAT2_CH8(1:end);");
 
-		engEvalString(ep, "subplot(2,4,3)");
-		engEvalString(ep, "plot(x5)");
+			engEvalString(ep, "figure(1)");
+			engEvalString(ep, "subplot(2,4,1);");
+			engEvalString(ep, "plot(x1);");
 
-		engEvalString(ep, "subplot(2,4,4)");
-		engEvalString(ep, "plot(x7)");
+			engEvalString(ep, "subplot(2,4,2)");
+			engEvalString(ep, "plot(x3)");
 
-		engEvalString(ep, "subplot(2,4,5)");
-		engEvalString(ep, "plot(x9)");
+			engEvalString(ep, "subplot(2,4,3)");
+			engEvalString(ep, "plot(x5)");
 
-		engEvalString(ep, "subplot(2,4,6)");
-		engEvalString(ep, "plot(x11)");
+			engEvalString(ep, "subplot(2,4,4)");
+			engEvalString(ep, "plot(x7)");
 
-		engEvalString(ep, "subplot(2,4,7)");
-		engEvalString(ep, "plot(x13)");
+			engEvalString(ep, "subplot(2,4,5)");
+			engEvalString(ep, "plot(x9)");
 
-		engEvalString(ep, "subplot(2,4,8)");
-		engEvalString(ep, "plot(x15)");
+			engEvalString(ep, "subplot(2,4,6)");
+			engEvalString(ep, "plot(x11)");
 
-		engEvalString(ep, "figure(2)");
-		engEvalString(ep, "subplot(2,4,1)");
-		engEvalString(ep, "plot(x2)");
+			engEvalString(ep, "subplot(2,4,7)");
+			engEvalString(ep, "plot(x13)");
 
-		engEvalString(ep, "subplot(2,4,2)");
-		engEvalString(ep, "plot(x4)");
+			engEvalString(ep, "subplot(2,4,8)");
+			engEvalString(ep, "plot(x15)");
 
-		engEvalString(ep, "subplot(2,4,3)");
-		engEvalString(ep, "plot(x6)");
+			engEvalString(ep, "figure(2)");
+			engEvalString(ep, "subplot(2,4,1)");
+			engEvalString(ep, "plot(x2)");
 
-		engEvalString(ep, "subplot(2,4,4)");
-		engEvalString(ep, "plot(x8)");
+			engEvalString(ep, "subplot(2,4,2)");
+			engEvalString(ep, "plot(x4)");
 
-		engEvalString(ep, "subplot(2,4,5)");
-		engEvalString(ep, "plot(x10)");
+			engEvalString(ep, "subplot(2,4,3)");
+			engEvalString(ep, "plot(x6)");
 
-		engEvalString(ep, "subplot(2,4,6)");
-		engEvalString(ep, "plot(x12)");
+			engEvalString(ep, "subplot(2,4,4)");
+			engEvalString(ep, "plot(x8)");
 
-		engEvalString(ep, "subplot(2,4,7)");
-		engEvalString(ep, "plot(x14)");
+			engEvalString(ep, "subplot(2,4,5)");
+			engEvalString(ep, "plot(x10)");
 
-		engEvalString(ep, "subplot(2,4,8)");
-		engEvalString(ep, "plot(x16)");
+			engEvalString(ep, "subplot(2,4,6)");
+			engEvalString(ep, "plot(x12)");
 
-		engEvalString(ep, "drawnow");
-		engEvalString(ep, "hold off");
+			engEvalString(ep, "subplot(2,4,7)");
+			engEvalString(ep, "plot(x14)");
 
-		//out_signal : 0 ~ processed_signal_size
-		
+			engEvalString(ep, "subplot(2,4,8)");
+			engEvalString(ep, "plot(x16)");
+
+			engEvalString(ep, "drawnow");
+			engEvalString(ep, "hold off");
+
+			//out_signal : 0 ~ processed_signal_size
+
+			//write file
+			printf("\n\n recording has started!! \n\n");
+			FILE *fp1 = fopen("rat1_ch1.bin", "a"); fwrite(rat1_ch1, 1, k, fp1); fclose(fp1);
+			FILE *fp2 = fopen("rat2_ch1.bin", "a"); fwrite(rat2_ch1, 1, k, fp2); fclose(fp2);
+			FILE *fp3 = fopen("rat1_ch2.bin", "a"); fwrite(rat1_ch2, 1, k, fp3); fclose(fp3);
+			FILE *fp4 = fopen("rat2_ch2.bin", "a"); fwrite(rat2_ch2, 1, k, fp4); fclose(fp4);
+			FILE *fp5 = fopen("rat1_ch3.bin", "a"); fwrite(rat1_ch3, 1, k, fp5); fclose(fp5);
+			FILE *fp6 = fopen("rat2_ch3.bin", "a"); fwrite(rat2_ch3, 1, k, fp6); fclose(fp6);
+			FILE *fp7 = fopen("rat1_ch4.bin", "a"); fwrite(rat1_ch4, 1, k, fp7); fclose(fp7);
+			FILE *fp8 = fopen("rat2_ch4.bin", "a"); fwrite(rat2_ch4, 1, k, fp8); fclose(fp8);
+			FILE *fp9 = fopen("rat1_ch5.bin", "a"); fwrite(rat1_ch5, 1, k, fp9); fclose(fp9);
+			FILE *fp10 = fopen("rat2_ch5.bin", "a"); fwrite(rat2_ch5, 1, k, fp10); fclose(fp10);
+			FILE *fp11 = fopen("rat1_ch6.bin", "a"); fwrite(rat1_ch6, 1, k, fp11); fclose(fp11);
+			FILE *fp12 = fopen("rat2_ch6.bin", "a"); fwrite(rat2_ch6, 1, k, fp12); fclose(fp12);
+			FILE *fp13 = fopen("rat1_ch7.bin", "a"); fwrite(rat1_ch7, 1, k, fp13); fclose(fp13);
+			FILE *fp14 = fopen("rat2_ch7.bin", "a"); fwrite(rat2_ch7, 1, k, fp14); fclose(fp14);
+			FILE *fp15 = fopen("rat1_ch8.bin", "a"); fwrite(rat1_ch8, 1, k, fp15); fclose(fp15);
+			FILE *fp16 = fopen("rat2_ch8.bin", "a"); fwrite(rat2_ch8, 1, k, fp16); fclose(fp16);
+		}
+
 		//loop_count for counting the loop
 		loop_count++;
-
-		//write file
-		FILE *fp1 = fopen("rat1_ch1.bin", "a"); fwrite(rat1_ch1, 1, k, fp1); fclose(fp1);
-		FILE *fp2 = fopen("rat2_ch1.bin", "a"); fwrite(rat2_ch1, 1, k, fp2); fclose(fp2);
-		FILE *fp3 = fopen("rat1_ch2.bin", "a"); fwrite(rat1_ch2, 1, k, fp3); fclose(fp3);
-		FILE *fp4 = fopen("rat2_ch2.bin", "a"); fwrite(rat2_ch2, 1, k, fp4); fclose(fp4);
-		FILE *fp5 = fopen("rat1_ch3.bin", "a"); fwrite(rat1_ch3, 1, k, fp5); fclose(fp5);
-		FILE *fp6 = fopen("rat2_ch3.bin", "a"); fwrite(rat2_ch3, 1, k, fp6); fclose(fp6);
-		FILE *fp7 = fopen("rat1_ch4.bin", "a"); fwrite(rat1_ch4, 1, k, fp7); fclose(fp7);
-		FILE *fp8 = fopen("rat2_ch4.bin", "a"); fwrite(rat2_ch4, 1, k, fp8); fclose(fp8);
-		FILE *fp9 = fopen("rat1_ch5.bin", "a"); fwrite(rat1_ch5, 1, k, fp9); fclose(fp9);
-		FILE *fp10 = fopen("rat2_ch5.bin", "a"); fwrite(rat2_ch5, 1, k, fp10); fclose(fp10);
-		FILE *fp11 = fopen("rat1_ch6.bin", "a"); fwrite(rat1_ch6, 1, k, fp11); fclose(fp11);
-		FILE *fp12 = fopen("rat2_ch6.bin", "a"); fwrite(rat2_ch6, 1, k, fp12); fclose(fp12);
-		FILE *fp13 = fopen("rat1_ch7.bin", "a"); fwrite(rat1_ch7, 1, k, fp13); fclose(fp13);
-		FILE *fp14 = fopen("rat2_ch7.bin", "a"); fwrite(rat2_ch7, 1, k, fp14); fclose(fp14);
-		FILE *fp15 = fopen("rat1_ch8.bin", "a"); fwrite(rat1_ch8, 1, k, fp15); fclose(fp15);
-		FILE *fp16 = fopen("rat2_ch8.bin", "a"); fwrite(rat2_ch8, 1, k, fp16); fclose(fp16);
-		//HANDLE hFile_cus;
-		//DWORD dwWrite, dwRead;
-		//hFile_cus = CreateFile(TEXT("rat1_ch1.txt"), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-		//if (hFile_cus == INVALID_HANDLE_VALUE)
-		//	return 0;
-		//WriteFile(hFile_cus, rat1_ch1, k*8, &dwWrite, NULL);
-		//CloseHandle(hFile_cus);
 
 		//original write file
 		WriteFile(pstWorkData->hFile, pstBufferData->pvDataCurrentBuf, pstBufferData->dwDataNotify, &dwWritten, NULL);
