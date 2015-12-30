@@ -234,9 +234,8 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		int moving_flag = 0;
 		double th = 0;
 		int processed_signal_size = floor(number_of_samples / down_sampling_rate);
-		int16_t* out_signal = (int16_t*)malloc(processed_signal_size * sizeof(int16_t));
+
 		int16_t* tmp_signal = (int16_t*)malloc((number_of_samples + down_sampling_rate) * sizeof(int16_t));
-		int16_t* answer_signal = (int16_t*)malloc(processed_signal_size * sizeof(int16_t));
 
 		static int16_t* samples_from_prev = (int16_t*)malloc(down_sampling_rate * sizeof(int16_t));
 		static int16_t* remain_samples = (int16_t*)malloc(down_sampling_rate * sizeof(int16_t));
@@ -254,6 +253,12 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		// change input signal to be multiple of 10, copy signal_int16 to input_signal
 		int16_t* input_signal = (int16_t*)malloc((num_samples_from_prev + number_of_samples - num_remain_samples) * sizeof(int16_t));
 		memcpy(input_signal, signal_int16, (num_samples_from_prev + number_of_samples - num_remain_samples) * sizeof(int16_t));
+
+		processed_signal_size = floor((num_samples_from_prev + number_of_samples - num_remain_samples) / down_sampling_rate);
+		printf("\n processed_signal_size = %d \n", processed_signal_size);
+		
+		int16_t* answer_signal = (int16_t*)malloc(processed_signal_size * sizeof(int16_t));
+		int16_t* out_signal = (int16_t*)malloc(processed_signal_size * sizeof(int16_t));
 
 		//print signal
 		static int cnt_signal = 0;
@@ -276,11 +281,11 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		for (int i = 0; i < processed_signal_size; i++) {
 			answer_signal[i] = 0;
 		}
-
+		
 		//main procedure
 		for (int i = 0; i < processed_signal_size; i++) {
 			if (i % looking_window_size == 0) {
-				if (i*down_sampling_rate + 1 <= number_of_samples && (i + 1)*down_sampling_rate + down_sampling_rate*looking_window_size <= number_of_samples){
+				if (i*down_sampling_rate + 1 <= number_of_samples && (i + 1)*down_sampling_rate + down_sampling_rate*looking_window_size <= number_of_samples) {
 					th = average(input_signal + i*down_sampling_rate, down_sampling_rate*looking_window_size);
 					//printf("\n\n if case, i = %d and th = %f", i, th);
 				}
@@ -290,47 +295,47 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 				}
 			}
 
-			// create answer_signal
-			int num_amend = 1000;
-			if (i % num_amend == 0) {
-				if (i < 838000) {
-					if (average(input_signal + down_sampling_rate*i, down_sampling_rate * 1) >= th) {
-						for (int ii = 0; ii < num_amend; ii++) {
-							if (ii % 2 == 0) {
-								answer_signal[i + ii] = 1;
-							}
-						}
-					}
-					else {
-						for (int ii = 0; ii < num_amend; ii++) {
-							if (ii % 2 == 1) {
-								answer_signal[i + ii] = 1;
-							}
-						}
-					}
-					//for print th and average value
-					//printf("\n th = %f \n", th);
-					//printf("\n average = %f \n", average(input_signal + down_sampling_rate*i, down_sampling_rate * 1));
-				}
+			//// create answer_signal
+			//int num_amend = 1000;
+			//if (i % num_amend == 0) {
+			//	if (i < 838000) {
+			//		if (average(input_signal + down_sampling_rate*i, down_sampling_rate * 1) >= th) {
+			//			for (int ii = 0; ii < num_amend; ii++) {
+			//				if (ii % 2 == 0) {
+			//					answer_signal[i + ii] = 1;
+			//				}
+			//			}
+			//		}
+			//		else {
+			//			for (int ii = 0; ii < num_amend; ii++) {
+			//				if (ii % 2 == 1) {
+			//					answer_signal[i + ii] = 1;
+			//				}
+			//			}
+			//		}
+			//		//for print th and average value
+			//		//printf("\n th = %f \n", th);
+			//		//printf("\n average = %f \n", average(input_signal + down_sampling_rate*i, down_sampling_rate * 1));
+			//	}
 
-				// when i >= 830000
-				else {
-					if (average(input_signal + down_sampling_rate*i, down_sampling_rate * 1) >= th) {
-						for (int ii = i; ii < processed_signal_size; ii++) {
-							if (ii % 2 == 0) {
-								answer_signal[ii] = 1;
-							}
-						}
-					}
-					else {
-						for (int ii = i; ii < processed_signal_size; ii++) {
-							if (ii % 2 == 1) {
-								answer_signal[ii] = 1;
-							}
-						}
-					}
-				}
-			}
+			//	// when i >= 830000
+			//	else {
+			//		if (average(input_signal + down_sampling_rate*i, down_sampling_rate * 1) >= th) {
+			//			for (int ii = i; ii < processed_signal_size; ii++) {
+			//				if (ii % 2 == 0) {
+			//					answer_signal[ii] = 1;
+			//				}
+			//			}
+			//		}
+			//		else {
+			//			for (int ii = i; ii < processed_signal_size; ii++) {
+			//				if (ii % 2 == 1) {
+			//					answer_signal[ii] = 1;
+			//				}
+			//			}
+			//		}
+			//	}
+			//}
 			if (average(input_signal + down_sampling_rate*i, down_sampling_rate * 1) >= th)
 				out_signal[i] = 1;
 			else
@@ -345,30 +350,37 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 		//}
 
 		//plot the out_signal
-		int count_differ = 0;
-		for (int i = 0; i < processed_signal_size-1; i++) {
-			if (out_signal[i] == out_signal[i + 1]) {
-				count_differ++;
-			}
-		}
+		//int count_differ = 0;
+		//for (int i = 0; i < processed_signal_size-1; i++) {
+		//	if (out_signal[i] == out_signal[i + 1]) {
+		//		count_differ++;
+		//	}
+		//}
 
 		//printf("%d", count_differ);
-		//print the accuracy
-		int number_of_correct_samples = 0;
-		for (int i = 0; i < processed_signal_size; i++) {
-			if (out_signal[i] == answer_signal[i])
-				number_of_correct_samples++;
-		}
 
-		double whole_accuracy = ((double)number_of_correct_samples / (double)processed_signal_size) * 100;
-		printf("\n %d th correct samples = %d \n", loop_count, number_of_correct_samples);
-		printf("\n %d th processed_signal_size = %d \n", loop_count, processed_signal_size);
-		printf("\n\n %d th loop's whole accuracy = %f \n", loop_count, whole_accuracy);
+		//print the accuracy
+		//int number_of_correct_samples = 0;
+		//for (int i = 0; i < processed_signal_size; i++) {
+		//	if (out_signal[i] == answer_signal[i])
+		//		number_of_correct_samples++;
+		//}
+
+		//double whole_accuracy = ((double)number_of_correct_samples / (double)processed_signal_size) * 100;
+		//printf("\n %d th correct samples = %d \n", loop_count, number_of_correct_samples);
+		//printf("\n %d th processed_signal_size = %d \n", loop_count, processed_signal_size);
+		//printf("\n\n %d th loop's whole accuracy = %f \n", loop_count, whole_accuracy);
 
 		//recording_flaging using preamble
 		static const int preamble_size = 16;
 		int third_1_cnt = 0;
 		int third_0_cnt = 0;
+		int fourth_1_cnt = 0;
+		int fourth_0_cnt = 0;
+		int fifth_1_cnt = 0;
+		int fifth_0_cnt = 0;
+		int sixth_1_cnt = 0;
+		int sixth_0_cnt = 0;
 
 		if (recording_flag == 0) {
 			for (int i = 0; i < processed_signal_size - 16; i++) {
@@ -386,14 +398,53 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 						//third_0_cnt = 4;
 
 						if (third_1_cnt == 4 && third_0_cnt == 4) {
-							recording_flag = 1;
-							memcpy(out_signal, out_signal + preamble_size, processed_signal_size - i - preamble_size);
-							processed_signal_size = processed_signal_size - i - preamble_size;
+							for (int j = 1; j <= 8; j++) {
+								if (out_signal[i + 15 + j] == 1) {
+									fourth_1_cnt++;
+								}
+								if (out_signal[i + 23 + j] == 0) {
+									fourth_0_cnt++;
+								}
+							}
+							
+							if (fourth_1_cnt == 8 && fourth_0_cnt == 8) {
+								for (int j = 1; j <= 16; j++) {
+									if (out_signal[i + 31 + j] == 1) {
+										fifth_1_cnt++;
+									}
+									if (out_signal[i + 47 + j] == 0) {
+										fifth_0_cnt++;
+									}
+								}
+								if (fifth_1_cnt == 16 && fifth_0_cnt == 16) {
+									for (int j = 1; j <= 32; j++) {
+										if (out_signal[i + 63 + j] == 1) {
+											sixth_1_cnt++;
+										}
+									}
+									for (int j = 1; j <= 23; j++) {
+										if (out_signal[i + 95 + j] == 0) {
+											sixth_0_cnt++;
+										}
+									}
+									if (sixth_1_cnt == 32 && sixth_0_cnt == 23) {
+										recording_flag = 1;
+										memcpy(out_signal, out_signal + preamble_size, processed_signal_size - i - preamble_size);
+										processed_signal_size = processed_signal_size - i - preamble_size;
+									}
+								}
+								
+							}
 						}
-
 					}
 					third_1_cnt = 0;
 					third_0_cnt = 0;
+					fourth_1_cnt = 0;
+					fourth_0_cnt = 0;
+					fifth_1_cnt = 0;
+					fifth_0_cnt = 0;
+					sixth_1_cnt = 0;
+					sixth_0_cnt = 0;
 				}
 			}
 		}
@@ -434,7 +485,7 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 			uint8_t* rat1_ch8 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
 			uint8_t* rat2_ch8 = (uint8_t*)malloc((int)processed_signal_size / BITS_NUM * sizeof(uint8_t));
 
-			const size_t rat1_ch1_dims[2] = { (int)(processed_signal_size / BITS_NUM / 8), 1 };
+			const size_t rat1_ch1_dims[2] = { floor(processed_signal_size / BITS_NUM / 8), 1 };
 			T_RAT1_CH1 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
 			T_RAT2_CH1 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
 			T_RAT1_CH2 = mxCreateNumericArray(1, rat1_ch1_dims, mxUINT8_CLASS, mxREAL);
@@ -483,7 +534,7 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 				rat1_ch8[0] = tmp_full_storage[16 * 7 + 0] * 128 + tmp_full_storage[16 * 7 + 2] * 64 + tmp_full_storage[16 * 7 + 4] * 32 + tmp_full_storage[16 * 7 + 6] * 16 + tmp_full_storage[16 * 7 + 8] * 8 + tmp_full_storage[16 * 7 + 10] * 4 + tmp_full_storage[16 * 7 + 12] * 2 + tmp_full_storage[16 * 7 + 14] * 1;
 				rat2_ch8[0] = tmp_full_storage[16 * 7 + 0 + 1] * 128 + tmp_full_storage[16 * 7 + 2 + 1] * 64 + tmp_full_storage[16 * 7 + 4 + 1] * 32 + tmp_full_storage[16 * 7 + 6 + 1] * 16 + tmp_full_storage[16 * 7 + 8 + 1] * 8 + tmp_full_storage[16 * 7 + 10 + 1] * 4 + tmp_full_storage[16 * 7 + 12 + 1] * 2 + tmp_full_storage[16 * 7 + 14 + 1] * 1;
 
-				while (CHANNEL_NUM*BITS_NUM*(k + 2) < processed_signal_size) {
+				while (CHANNEL_NUM*BITS_NUM*(k + 2) <= processed_signal_size) {
 					rat1_ch1[k + 1] = (uint8_t)(out_signal[starting_point + k * 128] * 128 + out_signal[starting_point + k * 128 + 2] * 64 + out_signal[starting_point + k * 128 + 4] * 32 + out_signal[starting_point + k * 128 + 6] * 16 + out_signal[starting_point + k * 128 + 8] * 8 + out_signal[starting_point + k * 128 + 10] * 4 + out_signal[starting_point + k * 128 + 12] * 2 + out_signal[starting_point + k * 128 + 14] * 1);
 					rat2_ch1[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 1] * 128 + out_signal[starting_point + k * 128 + 3] * 64 + out_signal[starting_point + k * 128 + 5] * 32 + out_signal[starting_point + k * 128 + 7] * 16 + out_signal[starting_point + k * 128 + 9] * 8 + out_signal[starting_point + k * 128 + 11] * 4 + out_signal[starting_point + k * 128 + 13] * 2 + out_signal[starting_point + k * 128 + 15] * 1);
 					rat1_ch2[k + 1] = (uint8_t)(out_signal[starting_point + k * 128 + 16] * 128 + out_signal[starting_point + k * 128 + 16 + 2] * 64 + out_signal[starting_point + k * 128 + 16 + 4] * 32 + out_signal[starting_point + k * 128 + 16 + 6] * 16 + out_signal[starting_point + k * 128 + 16 + 8] * 8 + out_signal[starting_point + k * 128 + 16 + 10] * 4 + out_signal[starting_point + k * 128 + 16 + 12] * 2 + out_signal[starting_point + k * 128 + 16 + 14] * 1);
@@ -506,7 +557,7 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 			}
 
 			else {
-				while (CHANNEL_NUM*BITS_NUM*(k + 1) < processed_signal_size) {
+				while (CHANNEL_NUM*BITS_NUM*(k + 1) <= processed_signal_size) {
 					rat1_ch1[k] = (uint8_t)(out_signal[starting_point + k * 128] * 128 + out_signal[starting_point + k * 128 + 2] * 64 + out_signal[starting_point + k * 128 + 4] * 32 + out_signal[starting_point + k * 128 + 6] * 16 + out_signal[starting_point + k * 128 + 8] * 8 + out_signal[starting_point + k * 128 + 10] * 4 + out_signal[starting_point + k * 128 + 12] * 2 + out_signal[starting_point + k * 128 + 14] * 1);
 					rat2_ch1[k] = (uint8_t)(out_signal[starting_point + k * 128 + 1] * 128 + out_signal[starting_point + k * 128 + 3] * 64 + out_signal[starting_point + k * 128 + 5] * 32 + out_signal[starting_point + k * 128 + 7] * 16 + out_signal[starting_point + k * 128 + 9] * 8 + out_signal[starting_point + k * 128 + 11] * 4 + out_signal[starting_point + k * 128 + 13] * 2 + out_signal[starting_point + k * 128 + 15] * 1);
 					rat1_ch2[k] = (uint8_t)(out_signal[starting_point + k * 128 + 16] * 128 + out_signal[starting_point + k * 128 + 16 + 2] * 64 + out_signal[starting_point + k * 128 + 16 + 4] * 32 + out_signal[starting_point + k * 128 + 16 + 6] * 16 + out_signal[starting_point + k * 128 + 16 + 8] * 8 + out_signal[starting_point + k * 128 + 16 + 10] * 4 + out_signal[starting_point + k * 128 + 16 + 12] * 2 + out_signal[starting_point + k * 128 + 16 + 14] * 1);
@@ -527,8 +578,7 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 					k = k + 1;
 				}
 			}
-			starting_point = (starting_point + processed_signal_size) % 128;
-			memcpy(tmp_storage, out_signal + processed_signal_size - starting_point, starting_point);
+
 
 			//print T using matlab
 			engPutVariable(ep, "T_RAT1_CH1", T_RAT1_CH1); engPutVariable(ep, "T_RAT2_CH1", T_RAT2_CH1);
@@ -605,23 +655,64 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 			//out_signal : 0 ~ processed_signal_size
 
 			//write file
-			printf("\n\n recording has started!! \n\n");
-			FILE *fp1 = fopen("rat1_ch1.bin", "a"); fwrite(rat1_ch1, 1, k, fp1); fclose(fp1);
-			FILE *fp2 = fopen("rat2_ch1.bin", "a"); fwrite(rat2_ch1, 1, k, fp2); fclose(fp2);
-			FILE *fp3 = fopen("rat1_ch2.bin", "a"); fwrite(rat1_ch2, 1, k, fp3); fclose(fp3);
-			FILE *fp4 = fopen("rat2_ch2.bin", "a"); fwrite(rat2_ch2, 1, k, fp4); fclose(fp4);
-			FILE *fp5 = fopen("rat1_ch3.bin", "a"); fwrite(rat1_ch3, 1, k, fp5); fclose(fp5);
-			FILE *fp6 = fopen("rat2_ch3.bin", "a"); fwrite(rat2_ch3, 1, k, fp6); fclose(fp6);
-			FILE *fp7 = fopen("rat1_ch4.bin", "a"); fwrite(rat1_ch4, 1, k, fp7); fclose(fp7);
-			FILE *fp8 = fopen("rat2_ch4.bin", "a"); fwrite(rat2_ch4, 1, k, fp8); fclose(fp8);
-			FILE *fp9 = fopen("rat1_ch5.bin", "a"); fwrite(rat1_ch5, 1, k, fp9); fclose(fp9);
-			FILE *fp10 = fopen("rat2_ch5.bin", "a"); fwrite(rat2_ch5, 1, k, fp10); fclose(fp10);
-			FILE *fp11 = fopen("rat1_ch6.bin", "a"); fwrite(rat1_ch6, 1, k, fp11); fclose(fp11);
-			FILE *fp12 = fopen("rat2_ch6.bin", "a"); fwrite(rat2_ch6, 1, k, fp12); fclose(fp12);
-			FILE *fp13 = fopen("rat1_ch7.bin", "a"); fwrite(rat1_ch7, 1, k, fp13); fclose(fp13);
-			FILE *fp14 = fopen("rat2_ch7.bin", "a"); fwrite(rat2_ch7, 1, k, fp14); fclose(fp14);
-			FILE *fp15 = fopen("rat1_ch8.bin", "a"); fwrite(rat1_ch8, 1, k, fp15); fclose(fp15);
-			FILE *fp16 = fopen("rat2_ch8.bin", "a"); fwrite(rat2_ch8, 1, k, fp16); fclose(fp16);
+			if (starting_point == 0) {
+				FILE *fp1 = fopen("rat1_ch1.bin", "a"); fwrite(rat1_ch1, 1, k, fp1); fclose(fp1);
+				FILE *fp2 = fopen("rat2_ch1.bin", "a"); fwrite(rat2_ch1, 1, k, fp2); fclose(fp2);
+				FILE *fp3 = fopen("rat1_ch2.bin", "a"); fwrite(rat1_ch2, 1, k, fp3); fclose(fp3);
+				FILE *fp4 = fopen("rat2_ch2.bin", "a"); fwrite(rat2_ch2, 1, k, fp4); fclose(fp4);
+				FILE *fp5 = fopen("rat1_ch3.bin", "a"); fwrite(rat1_ch3, 1, k, fp5); fclose(fp5);
+				FILE *fp6 = fopen("rat2_ch3.bin", "a"); fwrite(rat2_ch3, 1, k, fp6); fclose(fp6);
+				FILE *fp7 = fopen("rat1_ch4.bin", "a"); fwrite(rat1_ch4, 1, k, fp7); fclose(fp7);
+				FILE *fp8 = fopen("rat2_ch4.bin", "a"); fwrite(rat2_ch4, 1, k, fp8); fclose(fp8);
+				FILE *fp9 = fopen("rat1_ch5.bin", "a"); fwrite(rat1_ch5, 1, k, fp9); fclose(fp9);
+				FILE *fp10 = fopen("rat2_ch5.bin", "a"); fwrite(rat2_ch5, 1, k, fp10); fclose(fp10);
+				FILE *fp11 = fopen("rat1_ch6.bin", "a"); fwrite(rat1_ch6, 1, k, fp11); fclose(fp11);
+				FILE *fp12 = fopen("rat2_ch6.bin", "a"); fwrite(rat2_ch6, 1, k, fp12); fclose(fp12);
+				FILE *fp13 = fopen("rat1_ch7.bin", "a"); fwrite(rat1_ch7, 1, k, fp13); fclose(fp13);
+				FILE *fp14 = fopen("rat2_ch7.bin", "a"); fwrite(rat2_ch7, 1, k, fp14); fclose(fp14);
+				FILE *fp15 = fopen("rat1_ch8.bin", "a"); fwrite(rat1_ch8, 1, k, fp15); fclose(fp15);
+				FILE *fp16 = fopen("rat2_ch8.bin", "a"); fwrite(rat2_ch8, 1, k, fp16); fclose(fp16);
+			}
+			else {
+				FILE *fp1 = fopen("rat1_ch1.bin", "a"); fwrite(rat1_ch1, 1, k + 1, fp1); fclose(fp1);
+				FILE *fp2 = fopen("rat2_ch1.bin", "a"); fwrite(rat2_ch1, 1, k + 1, fp2); fclose(fp2);
+				FILE *fp3 = fopen("rat1_ch2.bin", "a"); fwrite(rat1_ch2, 1, k + 1, fp3); fclose(fp3);
+				FILE *fp4 = fopen("rat2_ch2.bin", "a"); fwrite(rat2_ch2, 1, k + 1, fp4); fclose(fp4);
+				FILE *fp5 = fopen("rat1_ch3.bin", "a"); fwrite(rat1_ch3, 1, k + 1, fp5); fclose(fp5);
+				FILE *fp6 = fopen("rat2_ch3.bin", "a"); fwrite(rat2_ch3, 1, k + 1, fp6); fclose(fp6);
+				FILE *fp7 = fopen("rat1_ch4.bin", "a"); fwrite(rat1_ch4, 1, k + 1, fp7); fclose(fp7);
+				FILE *fp8 = fopen("rat2_ch4.bin", "a"); fwrite(rat2_ch4, 1, k + 1, fp8); fclose(fp8);
+				FILE *fp9 = fopen("rat1_ch5.bin", "a"); fwrite(rat1_ch5, 1, k + 1, fp9); fclose(fp9);
+				FILE *fp10 = fopen("rat2_ch5.bin", "a"); fwrite(rat2_ch5, 1, k + 1, fp10); fclose(fp10);
+				FILE *fp11 = fopen("rat1_ch6.bin", "a"); fwrite(rat1_ch6, 1, k + 1, fp11); fclose(fp11);
+				FILE *fp12 = fopen("rat2_ch6.bin", "a"); fwrite(rat2_ch6, 1, k + 1, fp12); fclose(fp12);
+				FILE *fp13 = fopen("rat1_ch7.bin", "a"); fwrite(rat1_ch7, 1, k + 1, fp13); fclose(fp13);
+				FILE *fp14 = fopen("rat2_ch7.bin", "a"); fwrite(rat2_ch7, 1, k + 1, fp14); fclose(fp14);
+				FILE *fp15 = fopen("rat1_ch8.bin", "a"); fwrite(rat1_ch8, 1, k + 1, fp15); fclose(fp15);
+				FILE *fp16 = fopen("rat2_ch8.bin", "a"); fwrite(rat2_ch8, 1, k + 1, fp16); fclose(fp16);
+			}
+			starting_point = (starting_point + processed_signal_size) % 128;
+			memcpy(tmp_storage, out_signal + processed_signal_size - starting_point, starting_point);
+		
+			//memory free error??
+			//free(tmp_full_storage);
+			//free(tmp_storage);
+			//free(rat1_ch1);
+			//free(rat2_ch1);
+			//free(rat1_ch2);
+			//free(rat2_ch2);
+			//free(rat1_ch3);
+			//free(rat2_ch3);
+			//free(rat1_ch4);
+			//free(rat2_ch4);
+			//free(rat1_ch5);
+			//free(rat2_ch5);
+			//free(rat1_ch6);
+			//free(rat2_ch6);
+			//free(rat1_ch7);
+			//free(rat2_ch7);
+			//free(rat1_ch8);
+			//free(rat2_ch8);
 		}
 
 		//loop_count for counting the loop
@@ -632,11 +723,14 @@ bool bWorkDo(void * pvWorkData, ST_BUFFERDATA * pstBufferData)
 
 		//free allocated array and pointers
 		mxDestroyArray(T);
-		free(out_signal);
+		
+		free(signal_int16_addr);
 		free(tmp_signal);
+
+		//free(answer_signal);
 		free(input_signal);
 		free(answer_signal);
-		free(signal_int16_addr);
+		free(out_signal);
 
 		//free(samples_from_prev);
 		//free(remain_samples);
